@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+ <html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Retry+ Grow Quiz Game</title>
+<style>
+    /* LOADING SCREEN */
+
+#loadingScreen{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  height:100vh;
+  background:linear-gradient(135deg,#050a30,#12002b);
+}
+
+.loadingContent{
+  text-align:center;
+}
+
+.loadingImage{
+  width:520px;
+  max-width:90%;
+  border-radius:16px;
+  box-shadow:0 0 25px rgba(119,0,255,0.5);
+}
+
+.hurricaneSpin{
+  font-size:90px;
+  margin-top:20px;
+  animation:spinHurricane 3s linear infinite;
+}
+
+.loadingText{
+  margin-top:10px;
+  font-size:1.2rem;
+  color:#ffeb3b;
+}
+
+@keyframes spinHurricane{
+  from{transform:rotate(0deg);}
+  to{transform:rotate(360deg);}
+}
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron&family=Roboto:wght@400;700&display=swap');
+
+  :root { --accent1:#0055ff; --accent2:#7700ff; }
+  html,body { height:100%; margin:0; font-family:'Roboto',sans-serif; background:linear-gradient(135deg,#050a30,#12002b); color:#eee; }
+  #app { display:flex; flex-direction:column; min-height:100vh; }
+
+  /* START SCREEN */
+  #startScreen { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#00091a; padding:28px; position:relative; overflow:hidden; }
+  #astronaut {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: url('https://i.pinimg.com/originals/93/50/55/935055c542ec90cd73007a64f4e898d9.gif') center center / cover no-repeat;
+  opacity: 0.2;
+  animation: fadeOut 10s linear forwards;
+  z-index: 10;
+  pointer-events: none;
+}
+@keyframes fadeOut {
+  from { opacity: 0.2; }
+  to { opacity: 0; }
+}
+  #nameInput { font-size:1.2rem; padding:12px 16px; border-radius:14px; border:none; width:360px; max-width:90%; margin-top:12px; }
+  #startBtn { margin-top:14px; padding:12px 26px; border-radius:16px; border:none; background:linear-gradient(90deg,var(--accent1),var(--accent2)); color:#fff; font-size:1.05rem; cursor:pointer; }
+  #startBtn:disabled { opacity:.45; cursor:not-allowed; }
+  audio { display:none; }
+
+  /* QUIZ LAYOUT */
+  #quizContainer { display:none; flex:1; overflow:hidden; }
+/* Make the quiz container full height and stack vertically */
+#quizContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+#quizContainer {
+  display: flex;
+  flex-direction: row;      /* side by side */
+  min-height: 100vh;
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+  gap: 20px;               /* space between passage and questions */
+}
+
+#quizContainer {
+  display: flex;
+  flex-direction: row;
+  min-height: 100vh;
+  width: 100%;
+  gap: 20px; /* space between passage and questions */
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+/* LEFT COLUMN: Scrollable passage */
+#passageText {
+  flex: 1;
+  max-width: 50%;
+  overflow-y: auto;         /* Scrollable inside its box */
+  height: 100vh;            /* Take full viewport height */
+  padding: 20px;
+  box-sizing: border-box;
+  color: #eee;
+  background: #0c0c1f;
+  border-radius: 8px;
+  scrollbar-width: thin;
+}
+
+#passageText::-webkit-scrollbar {
+  width: 8px;
+}
+#passageText::-webkit-scrollbar-track {
+  background: #111;
+  border-radius: 8px;
+}
+#passageText::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #0055ff, #7700ff);
+  border-radius: 8px;
+}
+
+/* RIGHT COLUMN: Questions + options fixed layout */
+#questionArea {
+  flex: 1;
+  max-width: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  height: 100vh;           /* full height */
+  position: sticky;         /* fix on scroll if needed */
+  top: 0;
+  gap: 16px;
+  padding: 0 10px;
+  box-sizing: border-box;
+}
+
+/* Options full width and spaced */
+.optionBtn {
+  width: 100%;
+  min-height: 50px;
+  border-radius: 10px;
+  border: none;
+  padding: 12px 16px;
+  font-weight: 700;
+  background: linear-gradient(90deg, var(--accent1), var(--accent2));
+  color: #fff;
+  cursor: pointer;
+  text-align: left;
+  margin-bottom: 12px;      /* space between options */
+  transition: all 0.3s ease;
+}
+.optionBtn:hover {
+  transform: scale(1.02);
+}
+.optionSelected {
+  box-shadow: 0 0 12px rgba(119,0,255,0.3);
+  border: 2px solid rgba(255,255,255,0.06);
+}
+
+/* Responsive for small screens: stack vertically */
+@media (max-width: 900px) {
+  #quizContainer {
+    flex-direction: column;
+  }
+  #passageText, #questionArea {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+
+  #questionArea { width:100%; max-width:720px; padding:28px; box-sizing:border-box; display:flex; flex-direction:column; }
+  #progressBarContainer { height:26px; background:#222532; border-radius:16px; position:relative; margin-bottom:16px; overflow:hidden; }
+  #progressBarFill { height:100%; width:0%; background:linear-gradient(90deg,var(--accent1),var(--accent2)); transition:width .35s ease; }
+  #starIcon, #flagIcon { position:absolute; top:50%; transform:translateY(-50%); z-index:5; font-size:18px; pointer-events:none; }
+  #starIcon { left:6px; } #flagIcon { right:8px; }
+  #questionNumber { font-weight:700; margin-bottom:8px; }
+  #questionText { font-size:1.05rem; margin-bottom:12px; }
+  .extraNote { font-size:.95rem; color:#ffeb3b; margin-bottom:10px; width:100%; }
+#optionsContainer button.optionBtn {
+  background-image: linear-gradient(90deg,#0055ff,#7700ff);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+#optionsContainer button.optionBtn.optionSelected {
+  color: white !important;
+  background-image: linear-gradient(90deg,#069af0,#5cc0df);
+  box-shadow: 0 0 12px #0077ff;
+}
+  .optionBtn { width:76%; min-height:50px; border-radius:10px; border:none; padding:10px 12px; font-weight:700; background:linear-gradient(90deg,var(--accent1),var(--accent2)); color:#fff; cursor:pointer; text-align:left; }
+  .optionSelected { box-shadow:0 0 12px rgba(119,0,255,0.3); border:2px solid rgba(255,255,255,0.06); }
+  #controls { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:6px; }
+  #controls button { padding:8px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.08); background:transparent; color:#fff; cursor:pointer; }
+  #controls button:disabled { opacity:.45; cursor:not-allowed; }
+
+  /* RESULT */
+  #resultScreen { display:none; padding:20px; }
+  #scoreSummary { margin-bottom:12px; }
+  #feedbackList { max-height:58vh; overflow:auto; padding:12px; border-radius:8px; background:rgba(0,0,0,0.15); }
+  .feedbackItem { padding:8px 6px; border-bottom:1px dashed rgba(255,255,255,0.03); }
+
+  /* small responsive */
+  @media (max-width:900px) {
+    #passageText { display:none; }
+    #questionArea { width:100%; padding:18px; }
+    .optionBtn { width:100%; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- START -->
+  <section id="startScreen">
+    <div id="astronaut" title="Astronaut launching..."></div>
+    <h1 style="margin:0;font-size:2rem">Retry+ Grow Quiz Game</h1>
+    <input id="nameInput" placeholder="Enter your name" autocomplete="off" />
+    <button id="startBtn" disabled>Start Quiz</button>
+    <audio id="rocketSound" src="https://actions.google.com/sounds/v1/space/rocket_launch_countdown_beeps.ogg" preload="auto"></audio>
+  </section>
+<!-- LOADING SCREEN -->
+<section id="loadingScreen" style="display:none;">
+  <div class="loadingContent">
+
+    <!-- YOUR IMAGE -->
+    <img src="/mnt/data/Screenshot 2026-02-27 211350.png" 
+         alt="Retry + Grow" 
+         class="loadingImage">
+
+    <!-- SPINNING HURRICANE -->
+    <div class="hurricaneSpin">🌀</div>
+
+    <div class="loadingText">Preparing your mission...</div>
+
+  </div>
+</section>
+  <!-- QUIZ -->
+  <section id="quizContainer" style="display:none;">
+  <div id="passageText" aria-label="Passage Text" tabindex="0">
+    <div style="text-align:center;margin-bottom:1em;">
+      <h1 style="font-size:2em;font-weight:bold;margin:0;">After a Hurricane</h1>
+      <p style="font-size:1.1em;margin:0.2em 0 0;">by—Edgardo Sanabria Santaliz</p>
+    </div>
+    <p>After the Hurricane (May June 2023 passage)-  </p>
+
+<p>The truck appeared as soon as the sun set, bursting into the plaza from some street through which the nocturnal wave of murkiness and stars advanced.</p>
+
+<p>At once it proceeded to circle the tree-lined rectangle a number of times - secret, stealthy - like an animal searching for somewhere to rest.</p>
+
+<p>The old men sitting in a row on the long half-moon shaped concrete bench turned their heads in time to see it make its slow entrance.</p>
+
+<p>It passed in front of them (its dark blue brimming with shoals of luminescent decal art) and, turning off the headlights, stopped to one side of an arbour blown over a short while before by the hurricane.</p>
+
+<p>It was the same enormous, outlandish truck that had gone through the pueblo that afternoon, deafening everyone with its loudspeaker; it would have been easy to follow it by ear through the maze of streets.</p>
+
+<p>It was a navy blue truck, covered with decals of fish, that ended by circling around and around the plaza, from where the echo reverberated, moving away through the series of side streets that fed onto it.</p>
+
+<p>Then the truck had gone into one of them and disappeared, creating an unusual momentary silence everywhere, as if it had robbed the entire village of sound.</p>
+
+<p>Now it was here again, and a man got out, who seemed with his glance to take in the atmosphere of the public park and the white heights of the temple, dotted with already sleeping doves.</p>
+
+<p>He moved towards the back part of the vehicle and struggled with the doors for a while.</p>
+
+<p>From inside he brought out several bolts of a greyish material that he unrolled on the ground.</p>
+
+<p>In about an hour the bolts proved to be canvas, forming a small tent attached to the truck.</p>
+
+<p>The entrance to this sort of country house was covered with an arch of multi-colored light bulbs that, once turned on, outlined three shining words: THE BEAUTIFUL MELUSINE, in the black air of the night.</p>
+
+<p>At once the man went inside, like a mollusc into the shell, and he didn't show himself again until the town clock struck eight.</p>
+    <span><b><div>  Adapted from  —Edgardo Sanabria Santaliz, “After the Hurricane”</div></b></span>
+  </div>
+  <div id="questionArea" aria-live="polite" aria-atomic="true">
+      <div id="progressBarContainer">
+        <div id="progressBarFill"></div>
+        <div id="starIcon">⭐</div>
+        <div id="flagIcon">🏁</div>
+      </div>
+
+      <div id="questionNumber"></div>
+      <div id="questionText"></div>
+      <div id="extraNote" class="extraNote" aria-live="polite"></div>
+
+      <div id="optionsContainer" aria-label="Answer choices"></div>
+
+      <div id="controls">
+        <button id="backBtn">Back</button>
+        <button id="saveBtn">Save</button>
+        <button id="nextBtn">Next</button>
+        <button id="resetBtn">Reset</button>
+        <button id="submitBtn" style="display:none">Submit</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULT -->
+  <section id="resultScreen">
+    <h2>Quiz Results</h2>
+    <div id="scoreSummary"></div>
+    <div style="text-align:right;margin-bottom:8px;">
+      <button id="downloadPdfBtn">Download PDF Report</button>
+    </div>
+    <div id="feedbackList" role="region" aria-live="polite"></div>
+  </section>
+
+</div>
+
+<!-- jsPDF CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+(() => {
+  const { jsPDF } = window.jspdf;
+
+  // State
+  let questionsBank = [];
+  let selectedQuestions = [];
+  let userAnswers = {};
+  let currentQuestionIndex = 0;
+  let userName = '';
+  let backClickCount = 0;
+  let totalScore = 0;
+  let peerFeedbackClicked = false;
+// ---- Second chance system ----
+let wrongAnswerChances = [];
+// ---- Second chance system global variables ----
+let secondChancesUsed = 0;
+const MAX_SECOND_CHANCES = 2;
+  let maxScore = 0;
+  const marksMap = { easy:1, medium:2, hard:3 };
+  
+
+  // DOM refs
+  const startScreen = document.getElementById('startScreen');
+  const astronaut = document.getElementById('astronaut');
+  const rocketSound = document.getElementById('rocketSound');
+  const nameInput = document.getElementById('nameInput');
+  const startBtn = document.getElementById('startBtn');
+
+  const quizContainer = document.getElementById('quizContainer');
+  const passageText = document.getElementById('passageText');
+  const questionNumber = document.getElementById('questionNumber');
+  const questionText = document.getElementById('questionText');
+  const extraNote = document.getElementById('extraNote');
+  const optionsContainer = document.getElementById('optionsContainer');
+
+  const backBtn = document.getElementById('backBtn');
+  const saveBtn = document.getElementById('saveBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const submitBtn = document.getElementById('submitBtn');
+
+  const progressBarFill = document.getElementById('progressBarFill');
+  const starIcon = document.getElementById('starIcon');
+
+  const resultScreen = document.getElementById('resultScreen');
+  const scoreSummary = document.getElementById('scoreSummary');
+  const feedbackList = document.getElementById('feedbackList');
+  const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+
+  // enable Start button when name input not empty
+  nameInput.addEventListener('input', () => {
+    startBtn.disabled = nameInput.value.trim() === '';
+  });
+
+  // START button: play rocket animation and init quiz
+  startBtn.addEventListener('click', () => {
+    userName = nameInput.value.trim();
+    if (!userName) return;
+
+    // Play sound
+    try { rocketSound.currentTime = 0; rocketSound.play().catch(()=>{}); } catch(e){}
+
+    // animate astronaut up and fade; then hide start screen and show quiz
+    astronaut.style.animation = 'launchUp 1.6s ease-in forwards';
+    // delay to show animation, then show quiz
+    setTimeout(()=> {
+
+  startScreen.style.display = 'none';
+  document.getElementById("loadingScreen").style.display = "flex";
+
+  // show loading page for 3 seconds
+  setTimeout(()=>{
+
+      document.getElementById("loadingScreen").style.display = "none";
+      quizContainer.style.display = "flex";
+      initQuiz();
+
+  },3000);
+
+},900);
+  });
+
+  // Build questions bank (original questions preserved)
+  function generateQuestionsBank() {
+  const questions = [
+{id:1,difficulty:'easy',question:"When does the truck appear in the plaza?",options:["A. At sunrise","B. At noon","C. As soon as the sun set","D. At midnight"],correctIndex:2},
+{id:2,difficulty:'easy',question:"How does the truck move around the plaza at first?",options:["A. Quickly and noisily","B. Secret and stealthy, like an animal","C. Recklessly and wildly","D. Slowly and clumsily"],correctIndex:1},
+{id:3,difficulty:'easy',question:"Where were the old men sitting?",options:["A. On wooden chairs","B. On the temple steps","C. On a long half-moon shaped concrete bench","D. Under a tree"],correctIndex:2},
+{id:4,difficulty:'easy',question:"What color was the truck?",options:["A. Red","B. Black","C. Green","D. Navy blue"],correctIndex:3},
+{id:5,difficulty:'easy',question:"What covered the truck?",options:["A. Posters of singers","B. Decals of fish","C. Political slogans","D. Stripes and stars"],correctIndex:1},
+{id:6,difficulty:'easy',question:"What had been blown over by the hurricane?",options:["A. A house","B. A statue","C. An arbour","D. A streetlight"],correctIndex:2},
+{id:7,difficulty:'easy',question:"What had the truck done earlier that afternoon?",options:["A. Sold fruit in the market","B. Played through a loudspeaker","C. Delivered supplies","D. Picked up passengers"],correctIndex:1},
+{id:8,difficulty:'easy',question:"What happened when the truck disappeared into a side street?",options:["A. It caused confusion","B. It created a momentary silence","C. It started a fire","D. It began to rain"],correctIndex:1},
+{id:9,difficulty:'easy',question:"Who got out of the truck?",options:["A. A group of musicians","B. A woman in white","C. A young boy","D. A man"],correctIndex:3},
+{id:10,difficulty:'easy',question:"What did the man take out of the truck?",options:["A. Boxes of food","B. Bolts of greyish material","C. Chairs and tables","D. Loudspeakers"],correctIndex:1},
+{id:11,difficulty:'easy',question:"What did the greyish material turn out to be?",options:["A. Silk","B. Wool","C. Canvas","D. Plastic"],correctIndex:2},
+{id:12,difficulty:'easy',question:"What did the canvas form?",options:["A. A market stall","B. A small tent attached to the truck","C. A stage","D. A shed"],correctIndex:1},
+{id:13,difficulty:'easy',question:"What words were outlined in shining lights?",options:["A. THE MAGIC SHOW","B. THE BLUE TRUCK","C. THE BEAUTIFUL MELUSINE","D. THE GREAT HURRICANE"],correctIndex:2},
+{id:14,difficulty:'easy',question:"At what time did the man reappear?",options:["A. Seven o’clock","B. Eight o’clock","C. Nine o’clock","D. Ten o’clock"],correctIndex:1},
+{id:15,difficulty:'easy',question:"Where did the spectators gather?",options:["A. Around the temple","B. Down the main road","C. Around the square of the plaza","D. Near the houses"],correctIndex:2},
+{id:16,difficulty:'medium',question:"What simile is used to describe the truck’s movement?",options:["A. Like a bird in flight","B. Like an animal searching for somewhere to rest","C. Like a storm approaching","D. Like a ghost drifting"],correctIndex:1},
+{id:17,difficulty:'medium',question:"What effect did the truck’s disappearance have?",options:["A. It excited everyone","B. It robbed the village of sound","C. It frightened the old men","D. It caused shouting"],correctIndex:1},
+{id:18,difficulty:'medium',question:"What did the man observe after getting out?",options:["A. The damaged houses","B. The empty streets","C. The park and the white heights of the temple","D. The marketplace"],correctIndex:2},
+{id:19,difficulty:'medium',question:"How long did it take to set up the tent?",options:["A. Ten minutes","B. Half an hour","C. About an hour","D. Two hours"],correctIndex:2},
+{id:20,difficulty:'medium',question:"How is the entrance decorated?",options:["A. With flags","B. With curtains","C. With an arch of multi-colored light bulbs","D. With paintings"],correctIndex:2},
+{id:21,difficulty:'medium',question:"What simile describes the man entering the tent?",options:["A. Like a fox into a den","B. Like a mollusc into its shell","C. Like a child into bed","D. Like a bird into a nest"],correctIndex:1},
+{id:22,difficulty:'medium',question:"What natural elements are mentioned at the beginning?",options:["A. Rain and thunder","B. Murkiness and stars","C. Snow and wind","D. Lightning and clouds"],correctIndex:1},
+{id:23,difficulty:'medium',question:"How had the truck been noticeable earlier?",options:["A. Its bright paint","B. Its loudspeaker","C. Its flashing lights","D. Its size alone"],correctIndex:1},
+{id:24,difficulty:'medium',question:"What shape is the bench described as?",options:["A. Circular","B. Square","C. Half-moon shaped","D. Rectangular"],correctIndex:2},
+{id:25,difficulty:'medium',question:"What birds are mentioned near the temple?",options:["A. Crows","B. Pigeons","C. Doves","D. Sparrows"],correctIndex:2},
+{id:26,difficulty:'hard',question:"Why is the truck described as 'outlandish'?",options:["A. It was broken","B. It was unusually large and decorated","C. It was very old","D. It was silent"],correctIndex:1},
+{id:27,difficulty:'hard',question:"What mood is created by the glowing words in the black night air?",options:["A. Cheerful and ordinary","B. Mysterious and theatrical","C. Angry and tense","D. Calm and dull"],correctIndex:1},
+{id:28,difficulty:'hard',question:"What does the silence suggest about the truck’s presence?",options:["A. It was ignored","B. It dominated the senses of the village","C. It brought peace","D. It was unimportant"],correctIndex:1},
+{id:29,difficulty:'hard',question:"Why might the truck be compared to an animal?",options:["A. It was alive","B. It moved instinctively and cautiously","C. It made animal sounds","D. It carried animals"],correctIndex:1},
+{id:30,difficulty:'hard',question:"What does the description of circling suggest?",options:["A. Confusion","B. Careful searching","C. Celebration","D. Panic"],correctIndex:1},
+{id:31,difficulty:'hard',question:"What is the significance of the hurricane in the setting?",options:["A. It destroyed the truck","B. It explains the blown-over arbour","C. It caused the silence","D. It brought the spectators"],correctIndex:1},
+{id:32,difficulty:'hard',question:"How is the truck’s earlier journey described?",options:["A. Quiet and unnoticed","B. Easy to follow by ear","C. Difficult to trace","D. Hidden from view"],correctIndex:1},
+{id:33,difficulty:'hard',question:"What does the tent resemble metaphorically?",options:["A. A palace","B. A country house","C. A cave","D. A barn"],correctIndex:1},
+{id:34,difficulty:'hard',question:"What atmosphere surrounds the temple?",options:["A. Busy and noisy","B. Dark and frightening","C. Peaceful with sleeping doves","D. Crowded and chaotic"],correctIndex:2},
+{id:35,difficulty:'hard',question:"Why do spectators gather quickly?",options:["A. They fear the man","B. They are curious about the attraction","C. They want shelter","D. They are protesting"],correctIndex:1},
+{id:36,difficulty:'hard',question:"What literary device is used in 'robbed the entire village of sound'?",options:["A. Simile","B. Metaphor","C. Alliteration","D. Hyperbole"],correctIndex:1},
+{id:37,difficulty:'hard',question:"What contrast is shown between the truck and the temple?",options:["A. Noise versus silence","B. Darkness versus light","C. Modern spectacle versus traditional setting","D. Rich versus poor"],correctIndex:2},
+{id:38,difficulty:'hard',question:"What does the repeated circling emphasize?",options:["A. Celebration","B. Hesitation and suspense","C. Anger","D. Joy"],correctIndex:1},
+{id:39,difficulty:'hard',question:"What tone dominates the passage?",options:["A. Humorous","B. Suspenseful and mysterious","C. Romantic","D. Tragic"],correctIndex:1},
+{id:40,difficulty:'hard',question:"What does the name in lights suggest about the event?",options:["A. It is a political rally","B. It is a religious ceremony","C. It is a staged spectacle or show","D. It is a funeral"],correctIndex:2}
+];
+ return questions;
+  }
+  // helpers
+  function shuffleArray(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+  }
+  function randomSelect(arr, n) {
+    const copy = arr.slice();
+    shuffleArray(copy);
+    return copy.slice(0, n);
+  }
+
+  // initialize quiz
+  function initQuiz() {
+    questionsBank = generateQuestionsBank();
+    const easyPool = questionsBank.filter(q => q.difficulty === 'easy');
+    const medPool = questionsBank.filter(q => q.difficulty === 'medium');
+    const hardPool = questionsBank.filter(q => q.difficulty === 'hard');
+    
+
+    selectedQuestions = [];
+    selectedQuestions = selectedQuestions.concat(randomSelect(easyPool,25));
+    selectedQuestions = selectedQuestions.concat(randomSelect(medPool,10));
+    selectedQuestions = selectedQuestions.concat(randomSelect(hardPool,5));
+    shuffleArray(selectedQuestions);
+    
+
+    // place peer link and motivational sentence randomly (different positions)
+    const feedbackIndex = Math.floor(Math.random() * selectedQuestions.length);
+    let motivateIndex = Math.floor(Math.random() * selectedQuestions.length);
+    if (motivateIndex === feedbackIndex) motivateIndex = (feedbackIndex + 1) % selectedQuestions.length;
+    selectedQuestions[feedbackIndex].extraNote = `<a href="https://docs.google.com/forms/d/1zgYCV1DfB0blYVnCnetm3y8AhbI-JWHMZsrGJzHcMvM/viewform" target="_blank" style="color: skyblue; text-decoration: underline;">💬 Click to fill Peer Feedback Form</a>`;
+    setTimeout(() => {
+  const link = document.getElementById('peerFeedbackLink');
+  if (link) {
+    link.addEventListener('click', () => {
+      peerFeedbackClicked = true;
+    });
+  }
+}, 100);
+    selectedQuestions[motivateIndex].extraNote = '🌟 Keep going — you’re doing great!';
+    // Randomly select 2 questions for a "second chance" (or 1 if less than 2)
+// Randomly assign 2 questions that can trigger a second chance
+wrongAnswerChances = [];
+secondChancesUsed = 0;
+
+
+
+    userAnswers = {};
+    currentQuestionIndex = 0;
+    backClickCount = 0;
+
+    // attach event listeners to buttons (once)
+    attachControlListeners();
+
+    renderQuestion();
+  }
+
+  // attach click handlers (safe to call once)
+  let controlsAttached = false;
+  function attachControlListeners() {
+    if (controlsAttached) return;
+    controlsAttached = true;
+
+function checkSecondChance(qIdx, selectedIdx) {
+  const q = selectedQuestions[qIdx];
+  const correct = selectedIdx === q.correctIndex;
+
+}
+
+   nextBtn.addEventListener('click', () => {
+  saveAnswer();
+  if (currentQuestionIndex < selectedQuestions.length - 1) {
+    currentQuestionIndex++;
+    renderQuestion(); // <- corrected
+  }
+});
+
+backBtn.addEventListener('click', () => {
+  if (currentQuestionIndex > 0) {
+    currentQuestionIndex--;
+    backClickCount++;
+    renderQuestion();
+  }
+});
+
+    saveBtn.addEventListener('click', () => {
+      saveAnswer();
+      saveBtn.textContent = 'Saved ✓';
+      setTimeout(()=> saveBtn.textContent = 'Save', 900);
+    });
+
+    resetBtn.addEventListener('click', () => {
+      const q = selectedQuestions[currentQuestionIndex];
+      delete userAnswers[q.id];
+      Array.from(optionsContainer.children).forEach(b => b.classList.remove('optionSelected'));
+      updateControlState();
+    });
+
+    // submit action (kept attached to same submitBtn element so reordering doesn't lose listener)
+    submitBtn.addEventListener('click', () => {
+      saveAnswer();
+      finalizeAndShowResults();
+    });
+  }
+
+ 
+btn.addEventListener("click", () => {
+  // remove previous selection
+  Array.from(optionsContainer.children).forEach(b => b.classList.remove('optionSelected'));
+  btn.classList.add('optionSelected');
+
+  const isCorrect = i === q.correctIndex;
+
+  // SECOND CHANCE LOGIC (do NOT move forward yet)
+  if (!isCorrect && !q.secondChanceUsed && secondChancesUsed < MAX_SECOND_CHANCES) {
+    q.secondChanceUsed = true;
+    secondChancesUsed++;
+    extraNote.innerHTML = `💡 That’s not correct — try again! (${secondChancesUsed}/${MAX_SECOND_CHANCES})`;
+    delete userAnswers[q.id]; // clear stored answer for retry
+    return; // STAY on this question — do NOT advance
+  }
+
+  // If correct or no second chance left, record the answer
+  userAnswers[q.id] = i;
+
+  // Restore note text if not retrying
+  extraNote.innerHTML = q.extraNote ? q.extraNote : '';
+
+  // Enable Next/Submit
+  updateControlState();
+});
+
+function renderQuestion() {
+  const q = selectedQuestions[currentQuestionIndex];
+
+  questionNumber.textContent = `Question ${currentQuestionIndex + 1} of ${selectedQuestions.length}`;
+  questionText.textContent = q.question;
+  extraNote.innerHTML = q.extraNote || '';
+  optionsContainer.innerHTML = '';
+
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'optionBtn';
+    btn.textContent = opt;
+
+    if (userAnswers[q.id] === i) btn.classList.add('optionSelected');
+
+    btn.addEventListener('click', () => {
+      // Remove previous selection
+      Array.from(optionsContainer.children).forEach(b => b.classList.remove('optionSelected'));
+      btn.classList.add('optionSelected');
+
+      const isCorrect = i === q.correctIndex;
+
+      // Handle second chance logic (max 2 times per quiz)
+      if (!isCorrect && !q.secondChanceUsed && secondChancesUsed < 2) {
+        q.secondChanceUsed = true;
+        secondChancesUsed++;
+
+        // Show second chance message (without revealing correct answer)
+        extraNote.innerHTML = `💡 That’s not correct — try again! (${secondChancesUsed}/2)`;
+        delete userAnswers[q.id]; // allow retry
+        return; // stay on same question
+      }
+
+      // Record the user's answer
+      userAnswers[q.id] = i;
+
+      // After two second chances or correct answer, show NO feedback
+      extraNote.innerHTML = '';
+
+      // Always allow next button after selection
+      nextBtn.disabled = false;
+
+      updateControlState();
+    });
+
+    optionsContainer.appendChild(btn);
+  });
+
+  // Ensure next button is enabled if answer already selected
+  if (userAnswers[q.id] !== undefined) {
+    nextBtn.disabled = false;
+  }
+
+  updateControlState();
+  updateProgressBar();
+
+
+  // ----- CONTROL BUTTONS -----
+  const controls = document.getElementById('controls');
+
+  // Always append Back and Save first
+  controls.appendChild(backBtn);
+  controls.appendChild(saveBtn);
+
+  const isLast = currentQuestionIndex === selectedQuestions.length - 1;
+
+  if (isLast) {
+    submitBtn.style.display = 'inline-block';
+    nextBtn.style.display = 'none';
+    controls.appendChild(submitBtn);
+    controls.appendChild(resetBtn);
+  } else {
+    submitBtn.style.display = 'none';
+    nextBtn.style.display = 'inline-block';
+    controls.appendChild(nextBtn);
+    controls.appendChild(resetBtn);
+  }
+
+  // ----- ENABLE/DISABLE BACK BUTTON -----
+  backBtn.disabled = currentQuestionIndex === 0;
+  }
+
+  function updateControlState() {
+    const q = selectedQuestions[currentQuestionIndex];
+    const answered = userAnswers[q.id] !== undefined || Array.from(optionsContainer.children).some((b, i) => b.classList.contains('optionSelected'));
+    backBtn.disabled = currentQuestionIndex === 0;
+    // If there's an option element selected in DOM but not saved, allow next/submit but don't save yet until Save or Next mapped
+    nextBtn.disabled = !answered && currentQuestionIndex < selectedQuestions.length - 1;
+    submitBtn.disabled = !answered && currentQuestionIndex === selectedQuestions.length - 1;
+  }
+
+  function saveAnswer() {
+    const q = selectedQuestions[currentQuestionIndex];
+    const selectedIdx = Array.from(optionsContainer.children).findIndex(b => b.classList.contains('optionSelected'));
+    if (selectedIdx >= 0) {
+      userAnswers[q.id] = selectedIdx;
+    }
+    updateControlState();
+  }
+
+function calculateScore() {
+  totalScore = 0;
+  maxScore = 0;
+
+  // --- Base question scoring ---
+  selectedQuestions.forEach(q => {
+    const mark = marksMap[q.difficulty] || 1; // A=1, B=2, C=3
+    maxScore += mark;
+    if (userAnswers[q.id] === q.correctIndex) {
+      totalScore += mark;
+    }
+  });
+
+  // --- Calculate scaling so total is always out of 60 ---
+  const scale = 60 / maxScore;
+  let scaledScore = totalScore * scale; // This is the raw 0–60 score before bonus
+
+  // --- Apply bonus only if below 58 ---
+  if (scaledScore < 58) {
+    let bonus = 0;
+    if (backClickCount >= 1) bonus += 1;
+    if (peerFeedbackClicked) bonus += 1;
+    scaledScore += bonus;
+  }
+
+  // Cap score at 60 max
+  if (scaledScore > 60) scaledScore = 60;
+
+  // --- Round to whole number for display ---
+  totalScore = Math.round(scaledScore);
+  maxScore = 60;
+}
+
+  function finalizeAndShowResults() {
+    calculateScore();
+    function calculateScore() {
+  totalScore = 0; 
+  maxScore = 0;
+
+  selectedQuestions.forEach(q => {
+    const mark = marksMap[q.difficulty] || 1;
+    maxScore += mark;
+    if (userAnswers[q.id] === q.correctIndex) totalScore += mark;
+  });
+
+  // Extra point for using Back button at least once
+  if (backClickCount > 0) {
+    totalScore += 1;
+    maxScore += 1; // so total possible also increases
+  }
+
+  // Extra point if peer feedback form clicked
+  if (peerFeedbackClicked) {
+    totalScore += 1;
+    maxScore += 1;
+  }
+}
+    quizContainer.style.display = 'none';
+    resultScreen.style.display = 'block';
+    renderResultsScreen();
+  }
+
+  function renderResultsScreen() {
+    calculateScore();
+    const percent = maxScore > 0 ? Math.round((totalScore / maxScore) * 100) : 0;
+    let grade = 'F';
+    if (percent >= 85) grade = 'A';
+    else if (percent >= 70) grade = 'B';
+    else if (percent >= 50) grade = 'C';
+    else if (percent >= 40) grade = 'D';
+      else if (percent >= 30) grade = 'E';
+        else if (percent >= 20) grade = 'F';
+
+    // counts
+    let right = 0, wrong = 0, unanswered = 0;
+    selectedQuestions.forEach(q => {
+      if (userAnswers[q.id] === undefined) unanswered++;
+      else if (userAnswers[q.id] === q.correctIndex) right++;
+      else wrong++;
+    });
+let bonusNotes = [];
+if (backClickCount >= 1) bonusNotes.push('⭐ 1 pt for using Back button');
+if (peerFeedbackClicked) bonusNotes.push('💬 1 pt for clicking Peer Feedback Form');
+
+   
+scoreSummary.innerHTML = `
+  <div><strong>${userName}</strong>, you scored <strong>${totalScore}</strong> out of <strong>${maxScore}</strong> — <strong>${percent}%</strong> (${grade})</div>
+  <div style="margin-top:6px">Correct: ${right} | Incorrect: ${wrong} | Unanswered: ${unanswered} | Back clicked: ${backClickCount}</div>
+  ${bonusNotes.length > 0 ? `<div style="margin-top:6px;color:#ffeb3b">${bonusNotes.join('<br>')}</div>` : ''}
+  <div style="margin-top:6px;color:#ffeb3b">🌟 Keep going — progress, not perfection!</div>
+`;
+
+    // full detailed list scrollable
+    feedbackList.innerHTML = '';
+    selectedQuestions.forEach((q, idx) => {
+      const userIdx = userAnswers[q.id] === undefined ? null : userAnswers[q.id];
+      const isCorrect = userIdx !== null && userIdx === q.correctIndex;
+      const marks = isCorrect ? (marksMap[q.difficulty] || 1) : 0;
+      const div = document.createElement('div');
+      div.className = 'feedbackItem';
+      div.innerHTML = `<strong>Q${idx+1}.</strong> ${q.question} <br>
+        Your answer: <em>${ userIdx===null ? 'Unanswered' : q.options[userIdx] }</em> ${ isCorrect ? '✅' : '❌'} <br>
+        Correct answer: <strong>${q.options[q.correctIndex]}</strong> <br>
+        Marks awarded: ${marks}
+        ${q.extraNote ? `<div style="margin-top:6px;color:#ffeb3b">${q.extraNote.replace(/<a[^>]*>(.*?)<\/a>/,'$1')}</div>` : ''}
+      `;
+      feedbackList.appendChild(div);
+    });
+  }
+
+  // progress bar update
+  function updateProgressBar() {
+    const pct = ((currentQuestionIndex + 1) / selectedQuestions.length) * 100;
+    progressBarFill.style.width = pct + '%';
+    // move star along track (with small offset)
+    const container = document.getElementById('progressBarContainer');
+    const width = container.clientWidth || 300;
+    const left = Math.max(6, (width * (pct / 100)) - 10);
+    starIcon.style.left = left + 'px';
+  }
+
+  // PDF generation
+  downloadPdfBtn.addEventListener('click', () => {
+    calculateScore();
+    const doc = new jsPDF({ unit:'pt', format:'letter' });
+    const left = 36;
+    let y = 48;
+    doc.setFontSize(16);
+    doc.text(`Quiz Report — ${userName}`, left, y); y += 20;
+    doc.setFontSize(12);
+    const percent = maxScore > 0 ? Math.round((totalScore / maxScore) * 100) : 0;
+    let grade = 'F';
+    if (percent >= 85) grade = 'A';
+    else if (percent >= 70) grade = 'B';
+    else if (percent >= 50) grade = 'C';
+    else if (percent >= 40) grade = 'D';
+    else if (percent >= 30) grade = 'E';
+    else if (percent >= 20) grade = 'F';
+    doc.text(`Score: ${totalScore} / ${maxScore}`, left, y); y += 14;
+    doc.text(`Percentage: ${percent}%`, left, y); y += 14;
+    doc.text(`Letter Grade: ${grade}`, left, y); y += 14;
+    doc.text(`Back button clicked: ${backClickCount}`, left, y); y += 16;
+  if (backClickCount >= 1) { doc.text("Bonus: 1 pt for using Back button", left, y); y += 14; }
+if (peerFeedbackClicked) { doc.text("Bonus: 1 pt for clicking Peer Feedback Form", left, y); y += 14; }
+    // counts
+    let right = 0, wrong = 0, unanswered = 0;
+    selectedQuestions.forEach(q => {
+      if (userAnswers[q.id] === undefined) unanswered++;
+      else if (userAnswers[q.id] === q.correctIndex) right++;
+      else wrong++;
+    });
+    doc.text(`Correct: ${right}    Incorrect: ${wrong}    Unanswered: ${unanswered}`, left, y); y += 18;
+
+    doc.setFontSize(11);
+    doc.text('Responses:', left, y); y += 14;
+    doc.setFontSize(10);
+
+    selectedQuestions.forEach((q, i) => {
+      const userIdx = userAnswers[q.id] === undefined ? null : userAnswers[q.id];
+      const isCorrect = userIdx !== null && userIdx === q.correctIndex;
+      const marks = isCorrect ? (marksMap[q.difficulty] || 1) : 0;
+      const qTitle = `Q${i+1}: ${q.question}`;
+      const qLines = doc.splitTextToSize(qTitle, 520);
+    
+      if (y + qLines.length * 12 > 740) { doc.addPage(); y = 40; }
+      doc.text(qLines, left, y); y += qLines.length * 12;
+      doc.text(`Your answer: ${ userIdx===null ? 'Unanswered' : q.options[userIdx] }`, left + 8, y); y += 12;
+      doc.text(`Correct answer: ${q.options[q.correctIndex]}`, left + 8, y); y += 12;
+      doc.text(`Marks awarded: ${marks}`, left + 8, y); y += 14;
+      if (q.extraNote) {
+        const notePlain = q.extraNote.replace(/<[^>]*>/g,'');
+        doc.text(`Note: ${notePlain}`, left + 8, y); y += 14;
+      }
+      y += 4;
+      if (y > 740) { doc.addPage(); y = 40; }
+    });
+
+    const fname = `Quiz_Report_${(userName||'student').replace(/\s+/g,'_')}.pdf`;
+    doc.save(fname);
+  });
+
+})();
+</script>
+</body>
+</html>
+
+
