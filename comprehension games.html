@@ -1,822 +1,869 @@
 <!DOCTYPE html>
-<html lang="en">
+ <html lang="en">
 <head>
-<meta charset="UTF-8" />
+<meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Comprehension Quiz Game</title>
+<title>Retry+ Grow Quiz Game</title>
 <style>
+    /* LOADING SCREEN */
+
+#loadingScreen{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  height:100vh;
+  background:linear-gradient(135deg,#050a30,#12002b);
+}
+
+.loadingContent{
+  text-align:center;
+}
+
+.loadingImage{
+  width:520px;
+  max-width:90%;
+  border-radius:16px;
+  box-shadow:0 0 25px rgba(119,0,255,0.5);
+}
+
+.hurricaneSpin{
+  font-size:90px;
+  margin-top:20px;
+  animation:spinHurricane 3s linear infinite;
+}
+
+.loadingText{
+  margin-top:10px;
+  font-size:1.2rem;
+  color:#ffeb3b;
+}
+
+@keyframes spinHurricane{
+  from{transform:rotate(0deg);}
+  to{transform:rotate(360deg);}
+}
   @import url('https://fonts.googleapis.com/css2?family=Orbitron&family=Roboto:wght@400;700&display=swap');
-  body, html {
-    
-    margin: 0; padding: 0;
-    font-family: 'Roboto', sans-serif;
-    background: linear-gradient(135deg, #050a30, #12002b);
-    color: #eee;
-    height: 100vh;
-    overflow: hidden;
-  }
-  
-  #app {
-    display: flex;
-    height: 100vh;
-    flex-direction: column;
-  }
-  /* Start Screen */
-  #startScreen {
-    flex: 1;
-    background: #00091a;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: #7fffd4;
-    position: relative;
-    overflow: hidden;
-  }
-    
- #astronaut {
+
+  :root { --accent1:#0055ff; --accent2:#7700ff; }
+  html,body { height:100%; margin:0; font-family:'Roboto',sans-serif; background:linear-gradient(135deg,#050a30,#12002b); color:#eee; }
+  #app { display:flex; flex-direction:column; min-height:100vh; }
+
+  /* START SCREEN */
+  #startScreen { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#00091a; padding:28px; position:relative; overflow:hidden; }
+  #astronaut {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
   background: url('https://i.pinimg.com/originals/93/50/55/935055c542ec90cd73007a64f4e898d9.gif') center center / cover no-repeat;
   opacity: 0.2;
   animation: fadeOut 10s linear forwards;
-  z-index: 10; /* ⬅ Bring it above background, but still behind text */
+  z-index: 10;
   pointer-events: none;
 }
+@keyframes fadeOut {
+  from { opacity: 0.2; }
+  to { opacity: 0; }
+}
+  #nameInput { font-size:1.2rem; padding:12px 16px; border-radius:14px; border:none; width:360px; max-width:90%; margin-top:12px; }
+  #startBtn { margin-top:14px; padding:12px 26px; border-radius:16px; border:none; background:linear-gradient(90deg,var(--accent1),var(--accent2)); color:#fff; font-size:1.05rem; cursor:pointer; }
+  #startBtn:disabled { opacity:.45; cursor:not-allowed; }
+  audio { display:none; }
 
-  
- /* Fade-out animation */
-  @keyframes fadeOut {
-    from {
-      opacity: 0.2;
-    }
-    to {
-      opacity: 0;
-    }
-    
-  }
-  
-  /* Subtle rocket sound (handled in JS) */
-
-  #nameInput {
-    font-size: 1.4rem;
-    padding: 16px 20px;
-    border-radius: 17px;
-    border: none;
-    width: 320px;
-    max-width: 90vw;
-    margin-bottom: 16px;
-  }
-  #startBtn {
-    padding: 14px 32px;
-    font-size: 1.3rem;
-    background: linear-gradient(90deg, #0055ff, #7700ff);
-    border: none;
-    border-radius: 20px;
-    color: white;
-    cursor: pointer;
-    transition: box-shadow 0.3s ease;
-  }
-  #startBtn:hover:not(:disabled) {
-    box-shadow: 0 0 15px #7700ff;
-  }
-  #startBtn:disabled {
-    background: #555;
-    cursor: not-allowed;
-  }
-
- /* Main Quiz Layout */
+  /* QUIZ LAYOUT */
+  #quizContainer { display:none; flex:1; overflow:hidden; }
+/* Make the quiz container full height and stack vertically */
 #quizContainer {
-  flex: 1;
-  display: flex;
-  background: #0c0c1f;
-  overflow: hidden;
-}
-
-/* 🟦 Passage: now 60% of the screen */
-#passageText {
-  width: 65%;
-  padding: 85px 95px;
-  overflow-y: auto;
-  border-right: 2px solid #333;
-  font-size: 1.22rem;
-  line-height: 1.55;
-  box-sizing: border-box;
-  color: #eee;
-}
-
-/* 🟦 Questions: now 50%, with progress bar above */
-#questionArea {
-  width: 40%;
-  padding: 20px 25px;
   display: flex;
   flex-direction: column;
-}
-
-/* 🔼 Progress Bar moved higher */
-#progressBarContainer {
-  height: 15px;
-  width: 20%;
-  background: #222;
-  border-radius: 15px;
-  margin-bottom: 20px;
-  box-shadow: inset 0 0 6px #000;
-}
-
-#progressBarFill {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, #0055ff, #7700ff);
-  border-radius: 15px;
-  transition: width 0.4s ease;
-  box-shadow: 0 0 10px #7700ff;
-}
-
-/* Question */
-#questionNumber {
-  font-weight: 700;
-  font-size: 1.3rem;
-  margin-bottom: 10px;
-}
-#questionText {
-  font-size: 1.15rem;
-  margin-bottom: 18px;
-}
-
-#optionsContainer {
-  flex-grow: 1;
-}
-/* Style for the selected button */
-button.optionBtn.optionSelected {
-  background-color: #007bff;  /* Blue background */
-  color: white;  /* White text */
-  border: 2px solid #0056b3;  /* Dark blue border */
-}
-
-/* Style for the enlarged button */
-button.optionBtn.enlarged {
-  transform: scale(1.1);  /* Enlarge the button */
-  transition: transform 0.3s ease;  /* Smooth transition */
-}
-
-/* Optional: Style for all buttons */
-button.optionBtn {
-  padding: 10px 20px;
-  font-size: 16px;
-  cursor: pointer;
-  border: 2px solid #ccc;  /* Light border initially */
-  margin: 5px;
-  transition: all 0.3s ease;
-}
-
-button.optionBtn:hover {
-  background-color: #f0f0f0;
-}
-
-/* ⬆️ Option Buttons: Taller, cleaner */
-#optionsContainer button.optionBtn {
+  min-height: 100vh;
   width: 100%;
-  min-height: 70px; /* Taller buttons */
-  margin-bottom: 14px;
-  font-size: 1.15rem;
-  font-weight: 600;
-  border-radius: 14px;
-  border: none;
-  background-image: linear-gradient(90deg, #0055ff, #7700ff);
-  color: #ddd;
-  cursor: pointer;
-  transition: background-color 0.3s ease, color 0.3s ease;
-  user-select: none;
+  padding: 10px;
+  box-sizing: border-box;
 }
 
-#optionsContainer button.optionBtn:hover {
-  filter: brightness(1.15);
+#quizContainer {
+  display: flex;
+  flex-direction: row;      /* side by side */
+  min-height: 100vh;
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+  gap: 20px;               /* space between passage and questions */
 }
 
-#optionsContainer button.optionBtn.optionSelected {
-  color: white !important;
-  background-image: linear-gradient(90deg, #7700ff, #0055ff);
-  box-shadow: 0 0 12px #7700ff;
+#quizContainer {
+  display: flex;
+  flex-direction: row;
+  min-height: 100vh;
+  width: 100%;
+  gap: 20px; /* space between passage and questions */
+  padding: 10px;
+  box-sizing: border-box;
 }
 
-#controls button {
-  background-color: linear-gradient(90deg, #0055ff, #7700ff);
-  border: 1px solid #7700ff; /* same purple border */
-  color: #0b0218; /* purple text */
-  cursor: pointer;
-  transition: background-color 0.3s ease, color 0.3s ease;
-  /* Keep original small padding or override if needed */
-  padding: 12px 14px;
-  font-size: 0.9rem;
+/* LEFT COLUMN: Scrollable passage */
+#passageText {
+  flex: 1;
+  max-width: 50%;
+  overflow-y: auto;         /* Scrollable inside its box */
+  height: 100vh;            /* Take full viewport height */
+  padding: 20px;
+  box-sizing: border-box;
+  color: #eee;
+  background: #0c0c1f;
+  border-radius: 8px;
+  scrollbar-width: thin;
+}
+
+#passageText::-webkit-scrollbar {
+  width: 8px;
+}
+#passageText::-webkit-scrollbar-track {
+  background: #111;
+  border-radius: 8px;
+}
+#passageText::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #0055ff, #7700ff);
   border-radius: 8px;
 }
 
-#controls button:hover:not(:disabled) {
-  background-color: #7700ff;
-  color: rgb(0, 3, 5);
+/* RIGHT COLUMN: Questions + options fixed layout */
+#questionArea {
+  flex: 1;
+  max-width: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  height: 100vh;           /* full height */
+  position: sticky;         /* fix on scroll if needed */
+  top: 0;
+  gap: 16px;
+  padding: 0 10px;
+  box-sizing: border-box;
 }
 
-#controls button:disabled {
-  background-color:  linear-gradient(90deg, #5ebde2, #00ffea);
-  color: #bbb;
-  cursor: not-allowed;
-  border-color: #555;
-  box-shadow: none;
+/* Options full width and spaced */
+.optionBtn {
+  width: 100%;
+  min-height: 50px;
+  border-radius: 10px;
+  border: none;
+  padding: 12px 16px;
+  font-weight: 700;
+  background: linear-gradient(90deg, var(--accent1), var(--accent2));
+  color: #fff;
+  cursor: pointer;
+  text-align: left;
+  margin-bottom: 12px;      /* space between options */
+  transition: all 0.3s ease;
+}
+.optionBtn:hover {
+  transform: scale(1.02);
+}
+.optionSelected {
+  box-shadow: 0 0 12px rgba(119,0,255,0.3);
+  border: 2px solid rgba(255,255,255,0.06);
 }
 
-/* Add this inside your existing <style> in <head> */
-#feedbackList {
-  max-height: 400px;
-  overflow-y: auto;
-  padding-right: 8px;
-}
-.feedbackItem.correct {
-  background-color: #044404;
-}
-.feedbackItem.incorrect {
-  background-color: #ffe6e6;
+/* Responsive for small screens: stack vertically */
+@media (max-width: 900px) {
+  #quizContainer {
+    flex-direction: column;
+  }
+  #passageText, #questionArea {
+    max-width: 100%;
+    height: auto;
+  }
 }
 
-#controls button:hover {
-  box-shadow: 0 0 12px #7700ff;
-}
 
-#controls button:disabled {
-  background: #444;
-  cursor: not-allowed;
-  box-shadow: none;
+  #questionArea { width:100%; max-width:720px; padding:28px; box-sizing:border-box; display:flex; flex-direction:column; }
+  #progressBarContainer { height:26px; background:#222532; border-radius:16px; position:relative; margin-bottom:16px; overflow:hidden; }
+  #progressBarFill { height:100%; width:0%; background:linear-gradient(90deg,var(--accent1),var(--accent2)); transition:width .35s ease; }
+  #starIcon, #flagIcon { position:absolute; top:50%; transform:translateY(-50%); z-index:5; font-size:18px; pointer-events:none; }
+  #starIcon { left:6px; } #flagIcon { right:8px; }
+  #questionNumber { font-weight:700; margin-bottom:8px; }
+  #questionText { font-size:1.05rem; margin-bottom:12px; }
+  .extraNote { font-size:.95rem; color:#ffeb3b; margin-bottom:10px; width:100%; }
+#optionsContainer button.optionBtn {
+  background-image: linear-gradient(90deg,#0055ff,#7700ff);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
+#optionsContainer button.optionBtn.optionSelected {
+  color: white !important;
+  background-image: linear-gradient(90deg,#069af0,#5cc0df);
+  box-shadow: 0 0 12px #0077ff;
+}
+  .optionBtn { width:76%; min-height:50px; border-radius:10px; border:none; padding:10px 12px; font-weight:700; background:linear-gradient(90deg,var(--accent1),var(--accent2)); color:#fff; cursor:pointer; text-align:left; }
+  .optionSelected { box-shadow:0 0 12px rgba(119,0,255,0.3); border:2px solid rgba(255,255,255,0.06); }
+  #controls { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:6px; }
+  #controls button { padding:8px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.08); background:transparent; color:#fff; cursor:pointer; }
+  #controls button:disabled { opacity:.45; cursor:not-allowed; }
 
-  /* Responsive */
-  @media (max-width: 900px) {
-    #quizContainer {
-      flex-direction: column;
-    }
-    #passageText, #questionArea {
-      width: 100%;
-      height: 45vh;
-    }
+  /* RESULT */
+  #resultScreen { display:none; padding:20px; }
+  #scoreSummary { margin-bottom:12px; }
+  #feedbackList { max-height:58vh; overflow:auto; padding:12px; border-radius:8px; background:rgba(0,0,0,0.15); }
+  .feedbackItem { padding:8px 6px; border-bottom:1px dashed rgba(255,255,255,0.03); }
+
+  /* small responsive */
+  @media (max-width:900px) {
+    #passageText { display:none; }
+    #questionArea { width:100%; padding:18px; }
+    .optionBtn { width:100%; }
   }
 </style>
 </head>
 <body>
-
 <div id="app">
 
-  <!-- START SCREEN -->
-<section id="startScreen">
-  <!-- Astronaut background -->
-  <div id="astronaut" title="Astronaut launching..."></div>
+  <!-- START -->
+  <section id="startScreen">
+    <div id="astronaut" title="Astronaut launching..."></div>
+    <h1 style="margin:0;font-size:2rem">Retry+ Grow Quiz Game</h1>
+    <input id="nameInput" placeholder="Enter your name" autocomplete="off" />
+    <button id="startBtn" disabled>Start Quiz</button>
+    <audio id="rocketSound" src="https://actions.google.com/sounds/v1/space/rocket_launch_countdown_beeps.ogg" preload="auto"></audio>
+  </section>
+<!-- LOADING SCREEN -->
+<section id="loadingScreen" style="display:none;">
+  <div class="loadingContent">
 
-  <!-- Main quiz title -->
-  <h1>Comprehension Quiz Game</h1>
+    <!-- YOUR IMAGE -->
+    <img src="retry-grow.png"
+     alt="Retry + Grow"
+     class="loadingImage">
 
-  <!-- Name input and start button -->
-  <input type="text" id="nameInput" placeholder="Enter your name" autocomplete="off" />
-  <button id="startBtn" disabled>Start Quiz</button>
+    <!-- SPINNING HURRICANE -->
+    <div class="hurricaneSpin">🌀</div>
 
-  <!-- Sound effect -->
-  <audio id="rocketSound" src="https://actions.google.com/sounds/v1/space/rocket_launch_countdown_beeps.ogg" preload="auto"></audio>
-</section>
+    <div class="loadingText">Preparing your mission...</div>
 
-
-  <!-- QUIZ CONTAINER (hidden initially) -->
-  <section id="quizContainer" style="display:none;">
-    <div id="passageText" aria-label="Passage Text" tabindex="0">
-      </style>
-<div style="text-align: center; margin-bottom: 1em;">
-  <h1 style="font-size: 2em; font-weight: bold; margin: 0;">Everyday Use</h1>
-  <p style="font-size: 1.1em; margin: 0.2em 0 0;">by Alice Walker</p>
-</div>
-      <p>I will wait for her in the yard that Maggie and I made so clean and wavy yesterday afternoon. A yard like this is more comfortable than most people know. It is not just a yard. It is like an extended living room. Maggie will be nervous until after her sister goes: she will stand hopelessly in corners, homely and ashamed of the burn scars down her arms and legs, eyeing her sister with a mixture of envy and awe.</p>
-      <p>She thinks her sister has held life always in the palm of one hand, that "no" was a word the world never learned to say to her.</p>
-      <p><em>"How do I look, Mama?"</em> Maggie says, showing just enough of her thin body enveloped in a pink skirt and red blouse for me to know she's there, almost hidden by the door.</p>
-      <p>"Come out into the yard," I say.</p>
-      <p>Have you ever seen a lame animal, perhaps a dog run over by some careless person rich enough to own a car, sidle up to someone who is ignorant enough to be kind to him? That is the way my Maggie walks. She has been like this, chin on chest, eyes on the ground, feet in shuffle, ever since the fire that burned the other house to the ground. How long ago was it that the other house burned? Ten, twelve years? Sometimes I could still hear the flames and feel Maggie's arms sticking up to me, her hair smoking and her dress falling off her in little black papery flakes. And Dee. I see her standing off under the sweet gum tree she used to dig gum out of; a look of concentration on her face as she watched the last dingy gray boards of the house fall in towards the red-hot brick chimney. Why don't you do a dance around the ashes? I'd wanted to ask her. She had hated the house that much.</p>
-      <p>I used to think she hated Maggie, too. But that was before we raised the money, the church and me, to send her to Augusta to school. She used to read to us without pity; forcing words, lies, other folks' habits, whole lives upon us two, sitting trapped and ignorant underneath her voice. She washed us in a river of make-believe, burned us with a lot of knowledge we didn't necessarily need to know.</p>
-      <p>Dee wanted nice things. A yellow organdy dress to wear to her graduation from high school; black pumps to match a green suit she'd made from an old suit somebody gave me. She was determined to stare down any disaster in her efforts.</p>
-      <p>When she comes I will meet - but there they are!</p>
-      <p>Maggie attempts to make a dash for the house, in her shuffling way but I stay her with a hand. "Come back here." She stops and tries to dig a well in the sand with her toe. It is hard to see them clearly, but even the first glimpse of leg out of the car tells me it is Dee. Her feet were always neat-looking, as if God himself had shaped them. From the other side comes a short, stocky man. His hair is all over his head a foot long and hanging from his chin like a kinky mule tail.</p>
-      <p>"Well," I say. "Dee."</p>
-      <p>"No, Mama," she says. "Not 'Dee'. Wangero Leewanika Kemanjo."</p>
-      <p>"What happened to 'Dee'?" I wanted to know.</p>
-      <p>"She's dead," Wangero said. "I couldn't bear it any longer, being named after the people who oppressed me."</p>
-      <p>"You know as well as me you was named after your aunt Dicie," I said. "Dicie is my sister. She named you."</p>
-      <p>"Why shouldn't I? If that's what you want us to call you, we'll call you. Ream it out again." Well, soon we got the name out of the way.</p>
-      <span><b><div> Adapted from Alice Walker, "Everyday Use". In literature: Craft & Voice, Vol. 1, Fiction, pp. 608-611.</div></b></span>
-    </div>
-    <div id="progressBarContainer" aria-label="Quiz progress">
-      <div id="progressBarFill"></div>
-      <div id="progressWrapper">
-  <div id="progressBar">
-    <div id="progressBarFill">
-      <span id="progressStar">⭐</span>
-    </div>
-    <span id="progressStar">🏁</span>
   </div>
-</div>
-
+</section>
+  <!-- QUIZ -->
+  <section id="quizContainer" style="display:none;">
+  <div id="passageText" aria-label="Passage Text" tabindex="0">
+    <div style="text-align:center;margin-bottom:1em;">
+      <h1 style="font-size:2em;font-weight:bold;margin:0;">After a Hurricane</h1>
+      <p style="font-size:1.1em;margin:0.2em 0 0;">by—Edgardo Sanabria Santaliz</p>
     </div>
-    <div id="questionArea" aria-live="polite" aria-atomic="true">
+    <p>After the Hurricane (May June 2023 passage)-  </p>
+
+<p>The truck appeared as soon as the sun set, bursting into the plaza from some street through which the nocturnal wave of murkiness and stars advanced.</p>
+
+<p>At once it proceeded to circle the tree-lined rectangle a number of times - secret, stealthy - like an animal searching for somewhere to rest.</p>
+
+<p>The old men sitting in a row on the long half-moon shaped concrete bench turned their heads in time to see it make its slow entrance.</p>
+
+<p>It passed in front of them (its dark blue brimming with shoals of luminescent decal art) and, turning off the headlights, stopped to one side of an arbour blown over a short while before by the hurricane.</p>
+
+<p>It was the same enormous, outlandish truck that had gone through the pueblo that afternoon, deafening everyone with its loudspeaker; it would have been easy to follow it by ear through the maze of streets.</p>
+
+<p>It was a navy blue truck, covered with decals of fish, that ended by circling around and around the plaza, from where the echo reverberated, moving away through the series of side streets that fed onto it.</p>
+
+<p>Then the truck had gone into one of them and disappeared, creating an unusual momentary silence everywhere, as if it had robbed the entire village of sound.</p>
+
+<p>Now it was here again, and a man got out, who seemed with his glance to take in the atmosphere of the public park and the white heights of the temple, dotted with already sleeping doves.</p>
+
+<p>He moved towards the back part of the vehicle and struggled with the doors for a while.</p>
+
+<p>From inside he brought out several bolts of a greyish material that he unrolled on the ground.</p>
+
+<p>In about an hour the bolts proved to be canvas, forming a small tent attached to the truck.</p>
+
+<p>The entrance to this sort of country house was covered with an arch of multi-colored light bulbs that, once turned on, outlined three shining words: THE BEAUTIFUL MELUSINE, in the black air of the night.</p>
+
+<p>At once the man went inside, like a mollusc into the shell, and he didn't show himself again until the town clock struck eight.</p>
+    <span><b><div>  Adapted from  —Edgardo Sanabria Santaliz, “After the Hurricane”</div></b></span>
+  </div>
+  <div id="questionArea" aria-live="polite" aria-atomic="true">
+      <div id="progressBarContainer">
+        <div id="progressBarFill"></div>
+        <div id="starIcon">⭐</div>
+        <div id="flagIcon">🏁</div>
+      </div>
+
       <div id="questionNumber"></div>
       <div id="questionText"></div>
-      <div id="optionsContainer"></div>
+      <div id="extraNote" class="extraNote" aria-live="polite"></div>
+
+      <div id="optionsContainer" aria-label="Answer choices"></div>
+
       <div id="controls">
-        <button id="backBtn" disabled>Back</button>
+        <button id="backBtn">Back</button>
         <button id="saveBtn">Save</button>
-        <button id="nextBtn" disabled>Next</button>
+        <button id="nextBtn">Next</button>
         <button id="resetBtn">Reset</button>
-        <button id="submitBtn" style="display:none;background:#7700ff;">Submit</button>
+        <button id="submitBtn" style="display:none">Submit</button>
       </div>
     </div>
   </section>
 
-  <!-- RESULT SCREEN -->
-  <section id="resultScreen" style="display:none;">
+  <!-- RESULT -->
+  <section id="resultScreen">
     <h2>Quiz Results</h2>
     <div id="scoreSummary"></div>
-    <div id="feedbackList"></div>
-    <div style="text-align:center; margin-top: 25px;">
+    <div style="text-align:right;margin-bottom:8px;">
       <button id="downloadPdfBtn">Download PDF Report</button>
     </div>
+    <div id="feedbackList" role="region" aria-live="polite"></div>
   </section>
 
 </div>
 
+<!-- jsPDF CDN -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <script>
- (() => {
+(() => {
   const { jsPDF } = window.jspdf;
 
-  // Declare globally accessible score variables
+  // State
+  let questionsBank = [];
+  let selectedQuestions = [];
+  let userAnswers = {};
+  let currentQuestionIndex = 0;
+  let userName = '';
+  let backClickCount = 0;
   let totalScore = 0;
+  let peerFeedbackClicked = false;
+// ---- Second chance system ----
+let wrongAnswerChances = [];
+// ---- Second chance system global variables ----
+let secondChancesUsed = 0;
+const MAX_SECOND_CHANCES = 2;
   let maxScore = 0;
+  const marksMap = { easy:1, medium:2, hard:3 };
+  
 
-  // ... rest of your code ..
+  // DOM refs
+  const startScreen = document.getElementById('startScreen');
+  const astronaut = document.getElementById('astronaut');
+  const rocketSound = document.getElementById('rocketSound');
+  const nameInput = document.getElementById('nameInput');
+  const startBtn = document.getElementById('startBtn');
 
-    // Elements
-    const startScreen = document.getElementById('startScreen');
-    const astronaut = document.getElementById('astronaut');
-    const rocketSound = document.getElementById('rocketSound');
-    const nameInput = document.getElementById('nameInput');
-    const startBtn = document.getElementById('startBtn');
+  const quizContainer = document.getElementById('quizContainer');
+  const passageText = document.getElementById('passageText');
+  const questionNumber = document.getElementById('questionNumber');
+  const questionText = document.getElementById('questionText');
+  const extraNote = document.getElementById('extraNote');
+  const optionsContainer = document.getElementById('optionsContainer');
 
-    const quizContainer = document.getElementById('quizContainer');
-    const passageText = document.getElementById('passageText');
-    const questionNumber = document.getElementById('questionNumber');
-    const questionText = document.getElementById('questionText');
-    const optionsContainer = document.getElementById('optionsContainer');
+  const backBtn = document.getElementById('backBtn');
+  const saveBtn = document.getElementById('saveBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const submitBtn = document.getElementById('submitBtn');
 
-    const backBtn = document.getElementById('backBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const saveBtn = document.getElementById('saveBtn');
-    const submitBtn = document.getElementById('submitBtn');
+  const progressBarFill = document.getElementById('progressBarFill');
+  const starIcon = document.getElementById('starIcon');
 
-    const progressBarFill = document.getElementById('progressBarFill');
+  const resultScreen = document.getElementById('resultScreen');
+  const scoreSummary = document.getElementById('scoreSummary');
+  const feedbackList = document.getElementById('feedbackList');
+  const downloadPdfBtn = document.getElementById('downloadPdfBtn');
 
-    const resultScreen = document.getElementById('resultScreen');
-    const scoreSummary = document.getElementById('scoreSummary');
-    const feedbackList = document.getElementById('feedbackList');
-    const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+  // enable Start button when name input not empty
+  nameInput.addEventListener('input', () => {
+    startBtn.disabled = nameInput.value.trim() === '';
+  });
 
-    // Quiz data
-    let userName = '';
-    let questionsBank = []; // To be filled with 50 questions
-    let selectedQuestions = []; // 40 questions per attempt (25 easy, 10 medium, 5 hard)
-    let currentQuestionIndex = 0;
-    let userAnswers = {}; // {questionId: optionIndex}
-    let marksMap = { easy: 1, medium: 2, hard: 3 };
+  // START button: play rocket animation and init quiz
+  startBtn.addEventListener('click', () => {
+    userName = nameInput.value.trim();
+    if (!userName) return;
 
-    // Sounds for powerup progress bar steps
-    let powerUpSound = new Audio('https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg');
+    // Play sound
+    try { rocketSound.currentTime = 0; rocketSound.play().catch(()=>{}); } catch(e){}
 
-    // Enable start button only if name entered
-    nameInput.addEventListener('input', () => {
-      startBtn.disabled = nameInput.value.trim().length === 0;
-    });
+    // animate astronaut up and fade; then hide start screen and show quiz
+    astronaut.style.animation = 'launchUp 1.6s ease-in forwards';
+    // delay to show animation, then show quiz
+    setTimeout(()=> {
 
-    // Start button click handler
-    startBtn.addEventListener('click', () => {
-      userName = nameInput.value.trim();
-      if (!userName) return;
-      // Play rocket sound
-      rocketSound.play();
+  startScreen.style.display = 'none';
+  document.getElementById("loadingScreen").style.display = "flex";
 
-      // Show quiz container, hide start screen
-      startScreen.style.display = 'none';
-      quizContainer.style.display = 'flex';
+  // show loading page for 3 seconds
+  setTimeout(()=>{
 
+      document.getElementById("loadingScreen").style.display = "none";
+      quizContainer.style.display = "flex";
       initQuiz();
-    });
 
-    // Initialize Quiz
-    function initQuiz() {
-      // Load or generate questionsBank here (will be done in Part 2)
-      questionsBank = generateQuestionsBank();
-function generateQuestionsBank() {
-  return [
-    // Easy (1 mark each) — 25 questions
-    {id:1, difficulty:'easy', question:"Where is the narrator waiting for Maggie?", options:["In the yard they made clean and wavy yesterday","In the living room","At the school","Under the sweet gum tree"], correctIndex:0, tip:"Focus on the first sentence of the passage where the yard is mentioned."},
-    {id:2, difficulty:'easy', question:"How does Maggie walk after the fire?", options:["With her head held high","Chin on chest, eyes on ground, feet shuffling","Confident and proud","Dancing around the ashes"], correctIndex:1, tip:"Look for the description of Maggie's walking style after the fire."},
-    {id:3, difficulty:'easy', question:"Who changed her name to Wangero Leewanika Kemanjo?", options:["Dee","Maggie","Mama","Dicie"], correctIndex:0, tip:"This is explicitly stated by the character herself."},
-    {id:4, difficulty:'easy', question:"What color is Maggie's skirt?", options:["Pink","Yellow","Green","Blue"], correctIndex:0, tip:"Look for Maggie's clothing description."},
-    {id:5, difficulty:'easy', question:"Who helped raise money to send Dee to school?", options:["The narrator and the church","Wangero","Maggie","Dicie"], correctIndex:0, tip:"Look for who contributed to Dee’s education."},
-    {id:6, difficulty:'easy', question:"What kind of scars does Maggie have?", options:["Burn scars","Cut scars","Bruises","No scars"], correctIndex:0, tip:"Mentioned as burn scars down her arms and legs."},
-    {id:7, difficulty:'easy', question:"What question does Maggie ask Mama?", options:["How do I look, Mama?","Are you proud of me?","Will Dee stay?","Why did the house burn?"], correctIndex:0, tip:"Direct quote from Maggie."},
-    {id:8, difficulty:'easy', question:"Who stands off under the sweet gum tree?", options:["Dee","Maggie","Mama","Dicie"], correctIndex:0, tip:"Explicitly mentioned in the passage."},
-    {id:9, difficulty:'easy', question:"What does Maggie try to do when Dee arrives?", options:["Make a dash for the house","Hide behind the door","Talk to Dee","Run away"], correctIndex:0, tip:"Look for Maggie’s action on Dee's arrival."},
-    {id:10, difficulty:'easy', question:"How long ago was the other house burned?", options:["Ten or twelve years ago","Five years ago","Last year","Yesterday"], correctIndex:0, tip:"Narrator mentions approx. ten or twelve years."},
-    {id:11, difficulty:'easy', question:"What is Maggie's posture described as?", options:["Chin on chest, eyes on ground","Head held high","Arms crossed","Looking at Dee"], correctIndex:0, tip:"See description of Maggie’s posture."},
-    {id:12, difficulty:'easy', question:"Who named Dee originally?", options:["Dicie, the narrator's sister","Mama","Maggie","Wangero"], correctIndex:0, tip:"Explicit from the passage."},
-    {id:13, difficulty:'easy', question:"What color blouse does Maggie wear?", options:["Red","Blue","Green","Yellow"], correctIndex:0, tip:"Given in the passage."},
-    {id:14, difficulty:'easy', question:"Who does Maggie envy and awe?", options:["Her sister Dee","Mama","Dicie","Her friend"], correctIndex:0, tip:"Mentioned directly."},
-    {id:15, difficulty:'easy', question:"What is Dee's attitude when reading to them?", options:["Without pity","Kind and gentle","Boring","Loud"], correctIndex:0, tip:"Narrator says Dee reads without pity."},
-    {id:16, difficulty:'easy', question:"What did Dee want for her graduation dress?", options:["Yellow organdy dress","Pink skirt","Red blouse","Blue jeans"], correctIndex:0, tip:"Explicit in the passage."},
-    {id:17, difficulty:'easy', question:"How does the narrator describe Dee's feet?", options:["Neat-looking, shaped by God","Dirty and tired","Scarred","Burned"], correctIndex:0, tip:"Look for physical description of Dee's feet."},
-    {id:18, difficulty:'easy', question:"What did Dee say about her old name?", options:["She couldn't bear it any longer","She loved it","It was perfect","She never mentioned it"], correctIndex:0, tip:"Look for Dee’s reason for changing name."},
-    {id:19, difficulty:'easy', question:"Who tries to dig a well in the sand?", options:["Maggie","Dee","Mama","Dicie"], correctIndex:0, tip:"Maggie's action after being stopped."},
-    {id:20, difficulty:'easy', question:"Who does Mama call 'Dicie'?", options:["Her sister","Her daughter","Her friend","A neighbor"], correctIndex:0, tip:"Mentioned clearly in the passage."},
-    {id:21, difficulty:'easy', question:"What does Mama say to Maggie when she tries to run?", options:["Come back here","Go away","Stay outside","Don't run"], correctIndex:0, tip:"Look at direct quotes."},
-    {id:22, difficulty:'easy', question:"What is Maggie ashamed of?", options:["Her burn scars","Her clothes","Her hair","Her shoes"], correctIndex:0, tip:"Mentioned directly."},
-    {id:23, difficulty:'easy', question:"What was Dee determined to do?", options:["Stare down any disaster","Run away","Hide","Leave home"], correctIndex:0, tip:"Narrator’s description of Dee’s attitude."},
-    {id:24, difficulty:'easy', question:"Who is Wangero in relation to Dee?", options:["Same person, new name","Her friend","Her mother","Her cousin"], correctIndex:0, tip:"Name change explained."},
-    {id:25, difficulty:'easy', question:"What kind of dog is Maggie compared to?", options:["Lame animal sidling up to someone kind","Big dog","Fast dog","Hungry dog"], correctIndex:0, tip:"Metaphor about Maggie’s walk."},
+  },5000);
 
-    // Medium (2 marks each) — 10 questions
-    {id:26, difficulty:'medium', question:"Why does Dee want to change her name?", options:["To reject names of oppressors","To honor her aunt","To sound fancy","To hide her identity"], correctIndex:0, tip:"Look for Dee’s reason for name change."},
-    {id:27, difficulty:'medium', question:"What is the narrator’s feeling toward the yard?", options:["More comfortable than most people know","Just an ordinary yard","Unpleasant","Scary"], correctIndex:0, tip:"The narrator compares the yard to an extended living room."},
-    {id:28, difficulty:'medium', question:"How does the narrator describe Dee's reading to them?", options:["Forcing words, lies, other folks' habits on them","Kind and gentle","Confusing","Funny"], correctIndex:0, tip:"Narrator’s specific phrase."},
-    {id:29, difficulty:'medium', question:"What did Dee want to match with black pumps?", options:["A green suit","A pink blouse","A yellow dress","A red skirt"], correctIndex:0, tip:"Details about Dee’s graduation outfit."},
-    {id:30, difficulty:'medium', question:"What does the narrator imply about Maggie’s confidence?", options:["She is shy and ashamed","Very confident","Bold and loud","Unaware"], correctIndex:0, tip:"Look for Maggie’s behavior described in passage."},
-    {id:31, difficulty:'medium', question:"What is Mama’s reaction when Dee announces her new name?", options:["Surprised but accepts","Angry","Happy","Confused"], correctIndex:0, tip:"Dialogue between Mama and Wangero."},
-    {id:32, difficulty:'medium', question:"How does the narrator describe Dee’s ambitions?", options:["Determined to stare down disaster","Lazy and careless","Fearful and nervous","Indifferent"], correctIndex:0, tip:"Narrator’s insight about Dee."},
-    {id:33, difficulty:'medium', question:"Why does the narrator say Dee hated the house?", options:["Because she hated poverty and the house’s memories","Because it was old","Because Maggie lived there","Because it was too small"], correctIndex:0, tip:"Narrator’s interpretation of Dee’s feelings."},
-    {id:34, difficulty:'medium', question:"How long does the narrator say it has been since the fire?", options:["Ten to twelve years","Five years","A few months","One year"], correctIndex:0, tip:"Time since the fire given in passage."},
-    {id:35, difficulty:'medium', question:"What is the narrator's tone when talking about the fire?", options:["Reflective and somber","Joyful","Angry","Indifferent"], correctIndex:0, tip:"Tone inferred from descriptions."},
-
-    // Hard (3 marks each) — 5 questions
-    {id:36, difficulty:'hard', question:"What metaphor does the narrator use to describe Maggie's walk?", options:["Like a lame dog sidling up to someone kind","Like a lion stalking prey","Like a bird flying","Like a dancer"], correctIndex:0, tip:"Look for metaphor comparing Maggie’s movement."},
-    {id:37, difficulty:'hard', question:"How does the narrator contrast Maggie and Dee?", options:["Maggie is shy and humble; Dee is confident and ambitious","Both are shy","Both are outgoing","Maggie is ambitious; Dee is shy"], correctIndex:0, tip:"Analyze differences between sisters."},
-    {id:38, difficulty:'hard', question:"What does the narrator mean by 'She washed us in a river of make-believe'?", options:["Dee forced them to accept lies and false knowledge","Dee bathed them","Dee took them swimming","Dee told true stories"], correctIndex:0, tip:"Figurative language about Dee’s reading."},
-    {id:39, difficulty:'hard', question:"Why does Dee ‘hate’ the house, according to the narrator?", options:["Because it represents poverty and ignorance","Because it is old","Because it is cold","Because it is far from town"], correctIndex:0, tip:"The house symbolizes things Dee rejects."},
-    {id:40, difficulty:'hard', question:"What does the narrator imply about Dee's new name and identity?", options:["It's a rejection of her past and oppression","It is a random choice","It is a family tradition","It is a joke"], correctIndex:0, tip:"Dee explains her new name's significance."},
-
-    // Extra questions to reach 50 total (mixing easy & medium)
-
-    {id:41, difficulty:'easy', question:"What phrase describes Maggie's feet?", options:["Feet in shuffle","Fast feet","Dancing feet","Strong feet"], correctIndex:0, tip:"Check description of Maggie’s walk."},
-    {id:42, difficulty:'easy', question:"What did Mama raise with the church?", options:["Money to send Dee to school","A garden","A house","A party"], correctIndex:0, tip:"Mention of fundraiser with church."},
-    {id:43, difficulty:'easy', question:"What is Maggie's body enveloped in?", options:["Pink skirt and red blouse","Blue dress","Yellow coat","Green jacket"], correctIndex:0, tip:"See clothing description."},
-    {id:44, difficulty:'easy', question:"How does Maggie feel about her burn scars?", options:["Ashamed","Proud","Indifferent","Happy"], correctIndex:0, tip:"Look at Maggie’s feelings."},
-    {id:45, difficulty:'medium', question:"What does the narrator mean by 'life always in the palm of one hand' about Dee?", options:["Dee seems to control everything easily","Dee is always nervous","Dee is clumsy","Dee is shy"], correctIndex:0, tip:"Figurative speech about Dee’s life."},
-    {id:46, difficulty:'medium', question:"What is the significance of the sweet gum tree?", options:["Place where Dee watches","Where Maggie hides","Where Mama waits","A symbolic tree"], correctIndex:0, tip:"Mentioned where Dee stands watching."},
-    {id:47, difficulty:'medium', question:"How does Dee view the people who oppressed her?", options:["She wants to reject them by changing her name","She admires them","She ignores them","She fears them"], correctIndex:0, tip:"Look at Dee’s reason for name change."},
-    {id:48, difficulty:'medium', question:"Why does the narrator mention Dee’s black pumps?", options:["To show Dee’s desire for nice things","To mock Dee","To describe Maggie","To describe a gift"], correctIndex:0, tip:"Reflects Dee's ambitions and style."},
-    {id:49, difficulty:'medium', question:"What does 'stare down any disaster' imply about Dee?", options:["She is determined and fearless","She is scared","She avoids problems","She runs away"], correctIndex:0, tip:"Interpret this phrase about Dee."},
-    {id:50, difficulty:'medium', question:"What is the narrator's relationship with Dee and Maggie?", options:["Mother","Sister","Aunt","Friend"], correctIndex:0, tip:"Narrator refers to herself as 'Mama'."}
-  ];
-}
-
-      // Select 25 easy, 10 medium, 5 hard questions randomly
-      selectedQuestions = [];
-      selectedQuestions = selectedQuestions.concat(randomSelect(questionsBank.filter(q => q.difficulty === 'easy'), 25));
-      selectedQuestions = selectedQuestions.concat(randomSelect(questionsBank.filter(q => q.difficulty === 'medium'), 10));
-      selectedQuestions = selectedQuestions.concat(randomSelect(questionsBank.filter(q => q.difficulty === 'hard'), 5));
-
-      shuffleArray(selectedQuestions);
-
-      currentQuestionIndex = 0;
-      userAnswers = {};
-
-      renderQuestion();
-      updateControls();
-      updateProgressBar();
-    }
-
-    // Random select helper
-    function randomSelect(arr, count) {
-      let copy = arr.slice();
-      let result = [];
-      while(result.length < count && copy.length > 0) {
-        let idx = Math.floor(Math.random() * copy.length);
-        result.push(copy.splice(idx,1)[0]);
-      }
-      return result;
-    }
-
-    // Shuffle array helper
-    function shuffleArray(arr) {
-      for(let i=arr.length-1; i>0; i--) {
-        const j = Math.floor(Math.random()*(i+1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-      }
-    }
-
-    // Render current question
-    function renderQuestion() {
-      const q = selectedQuestions[currentQuestionIndex];
-      questionNumber.textContent = `Question ${currentQuestionIndex + 1} of ${selectedQuestions.length}`;
-      questionText.textContent = q.question;
-
-      optionsContainer.innerHTML = '';
-      q.options.forEach((opt, i) => {
-        const btn = document.createElement('button');
-        btn.className = 'optionBtn';
-        btn.textContent = opt;
-        btn.type = 'button';
-        btn.addEventListener('click', () => {
-          userAnswers[q.id] = i;
-          highlightSelectedOption(i);
-          updateControls();
-          updateProgressBar();
-          powerUpSound.play();
-        });
-        optionsContainer.appendChild(btn);
-      });
-
-      // Highlight previously selected option if exists
-      if (userAnswers[q.id] !== undefined) {
-        highlightSelectedOption(userAnswers[q.id]);
-      }
-    }
-
-    function highlightSelectedOption(selectedIndex) {
-      const buttons = optionsContainer.querySelectorAll('button.optionBtn');
-      buttons.forEach((btn, i) => {
-        btn.classList.toggle('optionSelected', i === selectedIndex);
-      });
-    }
-
-    // Controls update
-    function updateControls() {
-      backBtn.disabled = currentQuestionIndex === 0;
-      nextBtn.disabled = currentQuestionIndex === selectedQuestions.length - 1 || userAnswers[selectedQuestions[currentQuestionIndex].id] === undefined;
-
-      // Submit button visible only on last question and only if answered
-      if (currentQuestionIndex === selectedQuestions.length - 1 && userAnswers[selectedQuestions[currentQuestionIndex].id] !== undefined) {
-        submitBtn.style.display = 'inline-block';
-        nextBtn.style.display = 'none';
-      } else {
-        submitBtn.style.display = 'none';
-        nextBtn.style.display = 'inline-block';
-      }
-    }
-
-    // Update progress bar based on number of answered questions
-    function updateProgressBar() {
-      const answeredCount = Object.keys(userAnswers).length;
-      const percent = (answeredCount / selectedQuestions.length) * 100;
-      progressBarFill.style.width = `${percent}%`;
-    }
-
- function addTapListener(element, handler) {
-  element.addEventListener('click', handler);
-  element.addEventListener('touchstart', (e) => {
-    e.preventDefault();  // Prevents the simulated mouse event after touch
-    handler(e);
-  });
-}
-
-// Replace your existing button event listeners with this helper
-
-addTapListener(backBtn, () => {
-  if (currentQuestionIndex > 0) {
-    currentQuestionIndex--;
-    renderQuestion();
-    updateControls();
-  }
-});
-
-addTapListener(nextBtn, () => {
-  if (currentQuestionIndex < selectedQuestions.length - 1 && userAnswers[selectedQuestions[currentQuestionIndex].id] !== undefined) {
-    currentQuestionIndex++;
-    renderQuestion();
-    updateControls();
-  }
-});
-
-addTapListener(resetBtn, () => {
-  if (confirm('Reset all your answers and restart the quiz?')) {
-    userAnswers = {};
-    currentQuestionIndex = 0;
-    renderQuestion();
-    updateControls();
-    updateProgressBar();
-  }
-});
-
-addTapListener(saveBtn, () => {
-  saveProgress();
-  alert('Progress saved!');
-});
-
-addTapListener(submitBtn, () => {
-  if (!navigator.onLine) {
-    alert('You need to be online to submit your quiz. Please check your connection and try again.');
-    return;
-  }
-  if (Object.keys(userAnswers).length < selectedQuestions.length) {
-    if (!confirm('Some questions are unanswered. Submit anyway?')) return;
-  }
-  quizContainer.style.display = 'none';
-  showResults();
-  resultScreen.style.display = 'block';
-
-    });
-
-    // Save progress to sessionStorage
-    function saveProgress() {
-      const saveObj = {
-        userName,
-        selectedQuestions,
-        userAnswers,
-        currentQuestionIndex
-      };
-      sessionStorage.setItem('everydayUseQuizProgress', JSON.stringify(saveObj));
-    }
-
-    // Load progress if exists
-    function loadProgress() {
-      const saved = sessionStorage.getItem('everydayUseQuizProgress');
-      if (saved) {
-        try {
-          const obj = JSON.parse(saved);
-          if (obj && obj.userName && obj.selectedQuestions && obj.userAnswers) {
-            userName = obj.userName;
-            selectedQuestions = obj.selectedQuestions;
-            userAnswers = obj.userAnswers;
-            currentQuestionIndex = obj.currentQuestionIndex || 0;
-            return true;
-          }
-        } catch(e) {
-          return false;
-        }
-      }
-      return false;
-    }
-// Inside the existing JavaScript section
-
-// Function to highlight the selected option and enlarge the button
-function highlightSelectedOption(selectedIndex) {
-  const buttons = optionsContainer.querySelectorAll('button.optionBtn');
-  buttons.forEach((btn, i) => {
-    // If selected button, make it blue and enlarge, else revert to normal style
-    if (i === selectedIndex) {
-      btn.classList.add('optionSelected');
-      btn.classList.add('enlarged');  // Add enlarged class for button size change
-    } else {
-      btn.classList.remove('optionSelected');
-      btn.classList.remove('enlarged');
-    }
-  });
-}
-
-// Render current question
-function showResults() {
-  totalScore = 0;
-  maxScore = 0;
-  feedbackList.innerHTML = '';  // Clear the previous feedback if any
-
-  selectedQuestions.forEach(q => {
-    maxScore += marksMap[q.difficulty];  // Calculate the max score
+},2050);
   });
 
-  // Loop through each question to display results
-  selectedQuestions.forEach((q, index) => {
-    const userAns = userAnswers[q.id];  // Get the user's answer
-    const correct = userAns === q.correctIndex;  // Check if the answer is correct
-    if (correct) {
-      totalScore += marksMap[q.difficulty];  // Add score for correct answer
+  // Build questions bank (original questions preserved)
+  function generateQuestionsBank() {
+  const questions = [
+{id:1,difficulty:'easy',question:"When does the truck appear in the plaza?",options:["A. At sunrise","B. At noon","C. As soon as the sun set","D. At midnight"],correctIndex:2},
+{id:2,difficulty:'easy',question:"How does the truck move around the plaza at first?",options:["A. Quickly and noisily","B. Secret and stealthy, like an animal","C. Recklessly and wildly","D. Slowly and clumsily"],correctIndex:1},
+{id:3,difficulty:'easy',question:"Where were the old men sitting?",options:["A. On wooden chairs","B. On the temple steps","C. On a long half-moon shaped concrete bench","D. Under a tree"],correctIndex:2},
+{id:4,difficulty:'easy',question:"What color was the truck?",options:["A. Red","B. Black","C. Green","D. Navy blue"],correctIndex:3},
+{id:5,difficulty:'easy',question:"What covered the truck?",options:["A. Posters of singers","B. Decals of fish","C. Political slogans","D. Stripes and stars"],correctIndex:1},
+{id:6,difficulty:'easy',question:"What had been blown over by the hurricane?",options:["A. A house","B. A statue","C. An arbour","D. A streetlight"],correctIndex:2},
+{id:7,difficulty:'easy',question:"What had the truck done earlier that afternoon?",options:["A. Sold fruit in the market","B. Played through a loudspeaker","C. Delivered supplies","D. Picked up passengers"],correctIndex:1},
+{id:8,difficulty:'easy',question:"What happened when the truck disappeared into a side street?",options:["A. It caused confusion","B. It created a momentary silence","C. It started a fire","D. It began to rain"],correctIndex:1},
+{id:9,difficulty:'easy',question:"Who got out of the truck?",options:["A. A group of musicians","B. A woman in white","C. A young boy","D. A man"],correctIndex:3},
+{id:10,difficulty:'easy',question:"What did the man take out of the truck?",options:["A. Boxes of food","B. Bolts of greyish material","C. Chairs and tables","D. Loudspeakers"],correctIndex:1},
+{id:11,difficulty:'easy',question:"What did the greyish material turn out to be?",options:["A. Silk","B. Wool","C. Canvas","D. Plastic"],correctIndex:2},
+{id:12,difficulty:'easy',question:"What did the canvas form?",options:["A. A market stall","B. A small tent attached to the truck","C. A stage","D. A shed"],correctIndex:1},
+{id:13,difficulty:'easy',question:"What words were outlined in shining lights?",options:["A. THE MAGIC SHOW","B. THE BLUE TRUCK","C. THE BEAUTIFUL MELUSINE","D. THE GREAT HURRICANE"],correctIndex:2},
+{id:14,difficulty:'easy',question:"At what time did the man reappear?",options:["A. Seven o’clock","B. Eight o’clock","C. Nine o’clock","D. Ten o’clock"],correctIndex:1},
+{id:15,difficulty:'easy',question:"Where did the spectators gather?",options:["A. Around the temple","B. Down the main road","C. Around the square of the plaza","D. Near the houses"],correctIndex:2},
+{id:16,difficulty:'medium',question:"What simile is used to describe the truck’s movement?",options:["A. Like a bird in flight","B. Like an animal searching for somewhere to rest","C. Like a storm approaching","D. Like a ghost drifting"],correctIndex:1},
+{id:17,difficulty:'medium',question:"What effect did the truck’s disappearance have?",options:["A. It excited everyone","B. It robbed the village of sound","C. It frightened the old men","D. It caused shouting"],correctIndex:1},
+{id:18,difficulty:'medium',question:"What did the man observe after getting out?",options:["A. The damaged houses","B. The empty streets","C. The park and the white heights of the temple","D. The marketplace"],correctIndex:2},
+{id:19,difficulty:'medium',question:"How long did it take to set up the tent?",options:["A. Ten minutes","B. Half an hour","C. About an hour","D. Two hours"],correctIndex:2},
+{id:20,difficulty:'medium',question:"How is the entrance decorated?",options:["A. With flags","B. With curtains","C. With an arch of multi-colored light bulbs","D. With paintings"],correctIndex:2},
+{id:21,difficulty:'medium',question:"What simile describes the man entering the tent?",options:["A. Like a fox into a den","B. Like a mollusc into its shell","C. Like a child into bed","D. Like a bird into a nest"],correctIndex:1},
+{id:22,difficulty:'medium',question:"What natural elements are mentioned at the beginning?",options:["A. Rain and thunder","B. Murkiness and stars","C. Snow and wind","D. Lightning and clouds"],correctIndex:1},
+{id:23,difficulty:'medium',question:"How had the truck been noticeable earlier?",options:["A. Its bright paint","B. Its loudspeaker","C. Its flashing lights","D. Its size alone"],correctIndex:1},
+{id:24,difficulty:'medium',question:"What shape is the bench described as?",options:["A. Circular","B. Square","C. Half-moon shaped","D. Rectangular"],correctIndex:2},
+{id:25,difficulty:'medium',question:"What birds are mentioned near the temple?",options:["A. Crows","B. Pigeons","C. Doves","D. Sparrows"],correctIndex:2},
+{id:26,difficulty:'hard',question:"Why is the truck described as 'outlandish'?",options:["A. It was broken","B. It was unusually large and decorated","C. It was very old","D. It was silent"],correctIndex:1},
+{id:27,difficulty:'hard',question:"What mood is created by the glowing words in the black night air?",options:["A. Cheerful and ordinary","B. Mysterious and theatrical","C. Angry and tense","D. Calm and dull"],correctIndex:1},
+{id:28,difficulty:'hard',question:"What does the silence suggest about the truck’s presence?",options:["A. It was ignored","B. It dominated the senses of the village","C. It brought peace","D. It was unimportant"],correctIndex:1},
+{id:29,difficulty:'hard',question:"Why might the truck be compared to an animal?",options:["A. It was alive","B. It moved instinctively and cautiously","C. It made animal sounds","D. It carried animals"],correctIndex:1},
+{id:30,difficulty:'hard',question:"What does the description of circling suggest?",options:["A. Confusion","B. Careful searching","C. Celebration","D. Panic"],correctIndex:1},
+{id:31,difficulty:'hard',question:"What is the significance of the hurricane in the setting?",options:["A. It destroyed the truck","B. It explains the blown-over arbour","C. It caused the silence","D. It brought the spectators"],correctIndex:1},
+{id:32,difficulty:'hard',question:"How is the truck’s earlier journey described?",options:["A. Quiet and unnoticed","B. Easy to follow by ear","C. Difficult to trace","D. Hidden from view"],correctIndex:1},
+{id:33,difficulty:'hard',question:"What does the tent resemble metaphorically?",options:["A. A palace","B. A country house","C. A cave","D. A barn"],correctIndex:1},
+{id:34,difficulty:'hard',question:"What atmosphere surrounds the temple?",options:["A. Busy and noisy","B. Dark and frightening","C. Peaceful with sleeping doves","D. Crowded and chaotic"],correctIndex:2},
+{id:35,difficulty:'hard',question:"Why do spectators gather quickly?",options:["A. They fear the man","B. They are curious about the attraction","C. They want shelter","D. They are protesting"],correctIndex:1},
+{id:36,difficulty:'hard',question:"What literary device is used in 'robbed the entire village of sound'?",options:["A. Simile","B. Metaphor","C. Alliteration","D. Hyperbole"],correctIndex:1},
+{id:37,difficulty:'hard',question:"What contrast is shown between the truck and the temple?",options:["A. Noise versus silence","B. Darkness versus light","C. Modern spectacle versus traditional setting","D. Rich versus poor"],correctIndex:2},
+{id:38,difficulty:'hard',question:"What does the repeated circling emphasize?",options:["A. Celebration","B. Hesitation and suspense","C. Anger","D. Joy"],correctIndex:1},
+{id:39,difficulty:'hard',question:"What tone dominates the passage?",options:["A. Humorous","B. Suspenseful and mysterious","C. Romantic","D. Tragic"],correctIndex:1},
+{id:40,difficulty:'hard',question:"What does the name in lights suggest about the event?",options:["A. It is a political rally","B. It is a religious ceremony","C. It is a staged spectacle or show","D. It is a funeral"],correctIndex:2}
+];
+ return questions;
+  }
+  // helpers
+  function shuffleArray(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
     }
-    // ...
+  }
+  function randomSelect(arr, n) {
+    const copy = arr.slice();
+    shuffleArray(copy);
+    return copy.slice(0, n);
+  }
+
+  // initialize quiz
+  function initQuiz() {
+    questionsBank = generateQuestionsBank();
+    const easyPool = questionsBank.filter(q => q.difficulty === 'easy');
+    const medPool = questionsBank.filter(q => q.difficulty === 'medium');
+    const hardPool = questionsBank.filter(q => q.difficulty === 'hard');
     
 
-    // Create wrapper div
-    const fbItem = document.createElement('div');
-    fbItem.className = 'feedbackItem ' + (correct ? 'correct' : 'incorrect');
+    selectedQuestions = [];
+    selectedQuestions = selectedQuestions.concat(randomSelect(easyPool,25));
+    selectedQuestions = selectedQuestions.concat(randomSelect(medPool,10));
+    selectedQuestions = selectedQuestions.concat(randomSelect(hardPool,5));
+    shuffleArray(selectedQuestions);
+    
 
-    // Question text
-    const qText = document.createElement('p');
-    qText.innerHTML = `<strong>Q${index + 1}:</strong> ${q.question}`;
-    fbItem.appendChild(qText);
+    // place peer link and motivational sentence randomly (different positions)
+    const feedbackIndex = Math.floor(Math.random() * selectedQuestions.length);
+    let motivateIndex = Math.floor(Math.random() * selectedQuestions.length);
+    if (motivateIndex === feedbackIndex) motivateIndex = (feedbackIndex + 1) % selectedQuestions.length;
+    selectedQuestions[feedbackIndex].extraNote = `<a href="https://docs.google.com/forms/d/1zgYCV1DfB0blYVnCnetm3y8AhbI-JWHMZsrGJzHcMvM/viewform" target="_blank" style="color: skyblue; text-decoration: underline;">💬 Click to fill Peer Feedback Form</a>`;
+    setTimeout(() => {
+  const link = document.getElementById('peerFeedbackLink');
+  if (link) {
+    link.addEventListener('click', () => {
+      peerFeedbackClicked = true;
+    });
+  }
+}, 100);
+    selectedQuestions[motivateIndex].extraNote = '🌟 Keep going — you’re doing great!';
+    // Randomly select 2 questions for a "second chance" (or 1 if less than 2)
+// Randomly assign 2 questions that can trigger a second chance
+wrongAnswerChances = [];
+secondChancesUsed = 0;
 
-    // User's answer
-    const userAnswerText = document.createElement('p');
-    userAnswerText.innerHTML = `<em>Your answer:</em> ${q.options[userAns] ?? "No answer"}`;
-    fbItem.appendChild(userAnswerText);
 
-    const feedbackText = document.createElement('p');
-if (correct) {
-  feedbackText.textContent = `Question ${index + 1}: ✅🎉 Congratulations, that is Correct`;
-} else {
-  feedbackText.textContent = `Question ${index + 1}: ❌ Incorrect - Tip: ${q.tip}`;
-}
-fbItem.appendChild(feedbackText);
 
-    // Feedback tip if incorrect
-    if (!correct) {
-      const tipText = document.createElement('p');
-      tipText.style.color = 'red';
-      tipText.innerHTML = `<strong>Tip:</strong> ${q.tip}`;
-      fbItem.appendChild(tipText);
-    }
+    userAnswers = {};
+    currentQuestionIndex = 0;
+    backClickCount = 0;
 
-    feedbackList.appendChild(fbItem);
-  });
+    // attach event listeners to buttons (once)
+    attachControlListeners();
 
-  // Calculate percentage and grade
-  const percent = Math.round((totalScore / maxScore) * 100);
-  let grade = '';
-  if (percent >= 85) grade = 'A';
-  else if (percent >= 70) grade = 'B';
-  else if (percent >= 50) grade = 'C';
-  else if (percent >= 30) grade = 'D';
-  else if (percent >= 21) grade = 'E';
-  else grade = 'F';
+    renderQuestion();
+  }
 
-  // Show summary
-  scoreSummary.innerHTML = `
-    Mr. King's grading system has scored your quiz.<br><br>
-    <strong>${userName}</strong>, your score is <strong>${totalScore} / ${maxScore}</strong> (${percent}%).<br>
-    Your letter grade is: <strong>${grade}</strong>.
-  `;
+  // attach click handlers (safe to call once)
+  let controlsAttached = false;
+  function attachControlListeners() {
+    if (controlsAttached) return;
+    controlsAttached = true;
 
-  // Store for PDF use
-  window.quizSummary = { totalScore, maxScore, percent, grade };
+function checkSecondChance(qIdx, selectedIdx) {
+  const q = selectedQuestions[qIdx];
+  const correct = selectedIdx === q.correctIndex;
+
 }
 
-downloadPdfBtn.addEventListener('click', () => {
-  console.log('Download PDF button clicked');
-  generatePDFReport();
+   nextBtn.addEventListener('click', () => {
+  saveAnswer();
+  if (currentQuestionIndex < selectedQuestions.length - 1) {
+    currentQuestionIndex++;
+    renderQuestion(); // <- corrected
+  }
 });
 
+backBtn.addEventListener('click', () => {
+  if (currentQuestionIndex > 0) {
+    currentQuestionIndex--;
+    backClickCount++;
+    renderQuestion();
+  }
+});
 
-function generatePDFReport() {
-  const doc = new jsPDF();
-  const margin = 15;
-  let y = margin;
-
-  // Title of the report
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(16);
-  doc.text("Everyday Use Quiz Report", margin, y);
-  y += 10;
-  
-  // Student Name
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(15);
-  doc.text(`Student Name: ${userName}`, margin, y);
-  y += 10;
-
-  // Score summary
-  doc.text(`Your score: ${totalScore} / ${maxScore}`, margin, y);
-  y += 12;
-
-  // Add each question + answer + feedback
-  selectedQuestions.forEach((q, i) => {
-    if (y > 270) {  // Add new page if content exceeds
-      doc.addPage();
-      y = margin;
-    }
-
-    // Question text
-    doc.setFont('helvetica', 'bold');
-    doc.text(`Q${i + 1}: ${q.question}`, margin, y);
-    y += 7;
-
-    // Options
-    doc.setFont('helvetica', 'normal');
-    q.options.forEach((opt, idx) => {
-      let prefix = '  ';
-      if (idx === q.correctIndex) prefix = '✔ ';  // Correct answer
-      if (userAnswers[q.id] === idx && userAnswers[q.id] !== q.correctIndex) prefix = '✘ ';  // Incorrect answer
-
-      doc.text(`${prefix}${opt}`, margin + 5, y);
-      y += 6;
+    saveBtn.addEventListener('click', () => {
+      saveAnswer();
+      saveBtn.textContent = 'Saved ✓';
+      setTimeout(()=> saveBtn.textContent = 'Save', 900);
     });
 
-    // Feedback for incorrect answers
-    if (userAnswers[q.id] !== q.correctIndex) {
-      doc.setFont('helvetica', 'italic');
-      doc.setTextColor(255, 0, 0);
-      doc.text(`Tip: ${q.tip}`, margin + 8, y);
-      doc.setTextColor(0, 0, 0); // Reset color
-      y += 8;
-    }
+    resetBtn.addEventListener('click', () => {
+      const q = selectedQuestions[currentQuestionIndex];
+      delete userAnswers[q.id];
+      Array.from(optionsContainer.children).forEach(b => b.classList.remove('optionSelected'));
+      updateControlState();
+    });
 
-    y += 5;  // Add space before next question
+    // submit action (kept attached to same submitBtn element so reordering doesn't lose listener)
+    submitBtn.addEventListener('click', () => {
+      saveAnswer();
+      finalizeAndShowResults();
+    });
+  }
+
+ 
+btn.addEventListener("click", () => {
+  // remove previous selection
+  Array.from(optionsContainer.children).forEach(b => b.classList.remove('optionSelected'));
+  btn.classList.add('optionSelected');
+
+  const isCorrect = i === q.correctIndex;
+
+  // SECOND CHANCE LOGIC (do NOT move forward yet)
+  if (!isCorrect && !q.secondChanceUsed && secondChancesUsed < MAX_SECOND_CHANCES) {
+    q.secondChanceUsed = true;
+    secondChancesUsed++;
+    extraNote.innerHTML = `💡 That’s not correct — try again! (${secondChancesUsed}/${MAX_SECOND_CHANCES})`;
+    delete userAnswers[q.id]; // clear stored answer for retry
+    return; // STAY on this question — do NOT advance
+  }
+
+  // If correct or no second chance left, record the answer
+  userAnswers[q.id] = i;
+
+  // Restore note text if not retrying
+  extraNote.innerHTML = q.extraNote ? q.extraNote : '';
+
+  // Enable Next/Submit
+  updateControlState();
+});
+
+function renderQuestion() {
+  const q = selectedQuestions[currentQuestionIndex];
+
+  questionNumber.textContent = `Question ${currentQuestionIndex + 1} of ${selectedQuestions.length}`;
+  questionText.textContent = q.question;
+  extraNote.innerHTML = q.extraNote || '';
+  optionsContainer.innerHTML = '';
+
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'optionBtn';
+    btn.textContent = opt;
+
+    if (userAnswers[q.id] === i) btn.classList.add('optionSelected');
+
+    btn.addEventListener('click', () => {
+      // Remove previous selection
+      Array.from(optionsContainer.children).forEach(b => b.classList.remove('optionSelected'));
+      btn.classList.add('optionSelected');
+
+      const isCorrect = i === q.correctIndex;
+
+      // Handle second chance logic (max 2 times per quiz)
+      if (!isCorrect && !q.secondChanceUsed && secondChancesUsed < 2) {
+        q.secondChanceUsed = true;
+        secondChancesUsed++;
+
+        // Show second chance message (without revealing correct answer)
+        extraNote.innerHTML = `💡 That’s not correct — try again! (${secondChancesUsed}/2)`;
+        delete userAnswers[q.id]; // allow retry
+        return; // stay on same question
+      }
+
+      // Record the user's answer
+      userAnswers[q.id] = i;
+
+      // After two second chances or correct answer, show NO feedback
+      extraNote.innerHTML = '';
+
+      // Always allow next button after selection
+      nextBtn.disabled = false;
+
+      updateControlState();
+    });
+
+    optionsContainer.appendChild(btn);
   });
 
-  // Save the PDF
-  doc.save(`EverydayUseQuizReport_${userName.replace(/\s+/g, '_')}.pdf`);
+  // Ensure next button is enabled if answer already selected
+  if (userAnswers[q.id] !== undefined) {
+    nextBtn.disabled = false;
+  }
+
+  updateControlState();
+  updateProgressBar();
+
+
+  // ----- CONTROL BUTTONS -----
+  const controls = document.getElementById('controls');
+
+  // Always append Back and Save first
+  controls.appendChild(backBtn);
+  controls.appendChild(saveBtn);
+
+  const isLast = currentQuestionIndex === selectedQuestions.length - 1;
+
+  if (isLast) {
+    submitBtn.style.display = 'inline-block';
+    nextBtn.style.display = 'none';
+    controls.appendChild(submitBtn);
+    controls.appendChild(resetBtn);
+  } else {
+    submitBtn.style.display = 'none';
+    nextBtn.style.display = 'inline-block';
+    controls.appendChild(nextBtn);
+    controls.appendChild(resetBtn);
+  }
+
+  // ----- ENABLE/DISABLE BACK BUTTON -----
+  backBtn.disabled = currentQuestionIndex === 0;
+  }
+
+  function updateControlState() {
+    const q = selectedQuestions[currentQuestionIndex];
+    const answered = userAnswers[q.id] !== undefined || Array.from(optionsContainer.children).some((b, i) => b.classList.contains('optionSelected'));
+    backBtn.disabled = currentQuestionIndex === 0;
+    // If there's an option element selected in DOM but not saved, allow next/submit but don't save yet until Save or Next mapped
+    nextBtn.disabled = !answered && currentQuestionIndex < selectedQuestions.length - 1;
+    submitBtn.disabled = !answered && currentQuestionIndex === selectedQuestions.length - 1;
+  }
+
+  function saveAnswer() {
+    const q = selectedQuestions[currentQuestionIndex];
+    const selectedIdx = Array.from(optionsContainer.children).findIndex(b => b.classList.contains('optionSelected'));
+    if (selectedIdx >= 0) {
+      userAnswers[q.id] = selectedIdx;
+    }
+    updateControlState();
+  }
+
+function calculateScore() {
+  totalScore = 0;
+  maxScore = 0;
+
+  // --- Base question scoring ---
+  selectedQuestions.forEach(q => {
+    const mark = marksMap[q.difficulty] || 1; // A=1, B=2, C=3
+    maxScore += mark;
+    if (userAnswers[q.id] === q.correctIndex) {
+      totalScore += mark;
+    }
+  });
+
+  // --- Calculate scaling so total is always out of 60 ---
+  const scale = 60 / maxScore;
+  let scaledScore = totalScore * scale; // This is the raw 0–60 score before bonus
+
+  // --- Apply bonus only if below 58 ---
+  if (scaledScore < 58) {
+    let bonus = 0;
+    if (backClickCount >= 1) bonus += 1;
+    if (peerFeedbackClicked) bonus += 1;
+    scaledScore += bonus;
+  }
+
+  // Cap score at 60 max
+  if (scaledScore > 60) scaledScore = 60;
+
+  // --- Round to whole number for display ---
+  totalScore = Math.round(scaledScore);
+  maxScore = 60;
 }
 
+  function finalizeAndShowResults() {
+    calculateScore();
+    function calculateScore() {
+  totalScore = 0; 
+  maxScore = 0;
 
-  })();
+  selectedQuestions.forEach(q => {
+    const mark = marksMap[q.difficulty] || 1;
+    maxScore += mark;
+    if (userAnswers[q.id] === q.correctIndex) totalScore += mark;
+  });
+
+  // Extra point for using Back button at least once
+  if (backClickCount > 0) {
+    totalScore += 1;
+    maxScore += 1; // so total possible also increases
+  }
+
+  // Extra point if peer feedback form clicked
+  if (peerFeedbackClicked) {
+    totalScore += 1;
+    maxScore += 1;
+  }
+}
+    quizContainer.style.display = 'none';
+    resultScreen.style.display = 'block';
+    renderResultsScreen();
+  }
+
+  function renderResultsScreen() {
+    calculateScore();
+    const percent = maxScore > 0 ? Math.round((totalScore / maxScore) * 100) : 0;
+    let grade = 'F';
+    if (percent >= 85) grade = 'A';
+    else if (percent >= 70) grade = 'B';
+    else if (percent >= 50) grade = 'C';
+    else if (percent >= 40) grade = 'D';
+      else if (percent >= 30) grade = 'E';
+        else if (percent >= 20) grade = 'F';
+
+    // counts
+    let right = 0, wrong = 0, unanswered = 0;
+    selectedQuestions.forEach(q => {
+      if (userAnswers[q.id] === undefined) unanswered++;
+      else if (userAnswers[q.id] === q.correctIndex) right++;
+      else wrong++;
+    });
+let bonusNotes = [];
+if (backClickCount >= 1) bonusNotes.push('⭐ 1 pt for using Back button');
+if (peerFeedbackClicked) bonusNotes.push('💬 1 pt for clicking Peer Feedback Form');
+
+   
+scoreSummary.innerHTML = `
+  <div><strong>${userName}</strong>, you scored <strong>${totalScore}</strong> out of <strong>${maxScore}</strong> — <strong>${percent}%</strong> (${grade})</div>
+  <div style="margin-top:6px">Correct: ${right} | Incorrect: ${wrong} | Unanswered: ${unanswered} | Back clicked: ${backClickCount}</div>
+  ${bonusNotes.length > 0 ? `<div style="margin-top:6px;color:#ffeb3b">${bonusNotes.join('<br>')}</div>` : ''}
+  <div style="margin-top:6px;color:#ffeb3b">🌟 Keep going — progress, not perfection!</div>
+`;
+
+    // full detailed list scrollable
+    feedbackList.innerHTML = '';
+    selectedQuestions.forEach((q, idx) => {
+      const userIdx = userAnswers[q.id] === undefined ? null : userAnswers[q.id];
+      const isCorrect = userIdx !== null && userIdx === q.correctIndex;
+      const marks = isCorrect ? (marksMap[q.difficulty] || 1) : 0;
+      const div = document.createElement('div');
+      div.className = 'feedbackItem';
+      div.innerHTML = `<strong>Q${idx+1}.</strong> ${q.question} <br>
+        Your answer: <em>${ userIdx===null ? 'Unanswered' : q.options[userIdx] }</em> ${ isCorrect ? '✅' : '❌'} <br>
+        Correct answer: <strong>${q.options[q.correctIndex]}</strong> <br>
+        Marks awarded: ${marks}
+        ${q.extraNote ? `<div style="margin-top:6px;color:#ffeb3b">${q.extraNote.replace(/<a[^>]*>(.*?)<\/a>/,'$1')}</div>` : ''}
+      `;
+      feedbackList.appendChild(div);
+    });
+  }
+
+  // progress bar update
+  function updateProgressBar() {
+    const pct = ((currentQuestionIndex + 1) / selectedQuestions.length) * 100;
+    progressBarFill.style.width = pct + '%';
+    // move star along track (with small offset)
+    const container = document.getElementById('progressBarContainer');
+    const width = container.clientWidth || 300;
+    const left = Math.max(6, (width * (pct / 100)) - 10);
+    starIcon.style.left = left + 'px';
+  }
+
+  // PDF generation
+  downloadPdfBtn.addEventListener('click', () => {
+    calculateScore();
+    const doc = new jsPDF({ unit:'pt', format:'letter' });
+    const left = 36;
+    let y = 48;
+    doc.setFontSize(16);
+    doc.text(`Quiz Report — ${userName}`, left, y); y += 20;
+    doc.setFontSize(12);
+    const percent = maxScore > 0 ? Math.round((totalScore / maxScore) * 100) : 0;
+    let grade = 'F';
+    if (percent >= 85) grade = 'A';
+    else if (percent >= 70) grade = 'B';
+    else if (percent >= 50) grade = 'C';
+    else if (percent >= 40) grade = 'D';
+    else if (percent >= 30) grade = 'E';
+    else if (percent >= 20) grade = 'F';
+    doc.text(`Score: ${totalScore} / ${maxScore}`, left, y); y += 14;
+    doc.text(`Percentage: ${percent}%`, left, y); y += 14;
+    doc.text(`Letter Grade: ${grade}`, left, y); y += 14;
+    doc.text(`Back button clicked: ${backClickCount}`, left, y); y += 16;
+  if (backClickCount >= 1) { doc.text("Bonus: 1 pt for using Back button", left, y); y += 14; }
+if (peerFeedbackClicked) { doc.text("Bonus: 1 pt for clicking Peer Feedback Form", left, y); y += 14; }
+    // counts
+    let right = 0, wrong = 0, unanswered = 0;
+    selectedQuestions.forEach(q => {
+      if (userAnswers[q.id] === undefined) unanswered++;
+      else if (userAnswers[q.id] === q.correctIndex) right++;
+      else wrong++;
+    });
+    doc.text(`Correct: ${right}    Incorrect: ${wrong}    Unanswered: ${unanswered}`, left, y); y += 18;
+
+    doc.setFontSize(11);
+    doc.text('Responses:', left, y); y += 14;
+    doc.setFontSize(10);
+
+    selectedQuestions.forEach((q, i) => {
+      const userIdx = userAnswers[q.id] === undefined ? null : userAnswers[q.id];
+      const isCorrect = userIdx !== null && userIdx === q.correctIndex;
+      const marks = isCorrect ? (marksMap[q.difficulty] || 1) : 0;
+      const qTitle = `Q${i+1}: ${q.question}`;
+      const qLines = doc.splitTextToSize(qTitle, 520);
+    
+      if (y + qLines.length * 12 > 740) { doc.addPage(); y = 40; }
+      doc.text(qLines, left, y); y += qLines.length * 12;
+      doc.text(`Your answer: ${ userIdx===null ? 'Unanswered' : q.options[userIdx] }`, left + 8, y); y += 12;
+      doc.text(`Correct answer: ${q.options[q.correctIndex]}`, left + 8, y); y += 12;
+      doc.text(`Marks awarded: ${marks}`, left + 8, y); y += 14;
+      if (q.extraNote) {
+        const notePlain = q.extraNote.replace(/<[^>]*>/g,'');
+        doc.text(`Note: ${notePlain}`, left + 8, y); y += 14;
+      }
+      y += 4;
+      if (y > 740) { doc.addPage(); y = 40; }
+    });
+
+    const fname = `Quiz_Report_${(userName||'student').replace(/\s+/g,'_')}.pdf`;
+    doc.save(fname);
+  });
+
+})();
 </script>
-
 </body>
 </html>
+
+
+
