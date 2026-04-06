@@ -267,6 +267,11 @@ button {
 <div class="container">
 
 <div class="timer" id="timer">40:00</div>
+  <div style="margin-bottom:20px;">
+    <label><b>Name:</b></label><br>
+    <input type="text" id="studentName" placeholder="Enter your full name"
+    style="width:100%; padding:10px; border-radius:6px; border:1px solid #ccc;">
+</div>
 
 <h2>Section A<br>SUMMARY WRITING</h2>
 
@@ -406,36 +411,42 @@ else if(percent>=40) grade="D";
 else if(percent>=21) grade="E";
 
 // DISPLAY
+let name = document.getElementById("studentName").value || "Unnamed Student";
+
 document.getElementById("result").innerHTML = `
 <h3>Results</h3>
+Name: ${name}<br>
 Score: ${total}/25 (${percent}%) - Grade ${grade}<br>
 Time Taken: ${document.getElementById("timer").innerText}<br>
 Feedback: Improve clarity, include key ideas, and manage word limit.<br><br>
-<button onclick="downloadPDF('${total}','${percent}','${grade}')">Download PDF Report</button>
+<button onclick="downloadPDF('${name}','${total}','${percent}','${grade}')">Download PDF Report</button>
 `;
 
 }
 
 // PDF
-function downloadPDF(total, percent, grade){
+function downloadPDF(name, total, percent, grade){
 const { jsPDF } = window.jspdf;
 let doc = new jsPDF();
 
+doc.setFontSize(16);
 doc.text("SUMMARY WRITING REPORT", 10, 10);
 
-doc.text(`Score: ${total}/25`, 10, 20);
-doc.text(`Percentage: ${percent}%`, 10, 30);
-doc.text(`Grade: ${grade}`, 10, 40);
+doc.setFontSize(12);
+doc.text(`Name: ${name}`, 10, 20);
+doc.text(`Score: ${total}/25`, 10, 30);
+doc.text(`Percentage: ${percent}%`, 10, 40);
+doc.text(`Grade: ${grade}`, 10, 50);
 
-doc.text("Teacher Editable Score:", 10, 60);
-doc.rect(10,65,50,10);
+doc.text("Teacher Editable Score:", 10, 70);
+doc.rect(10,75,60,10);
 
-doc.text("Teacher Comments:", 10, 80);
-doc.rect(10,85,150,30);
+doc.text("Teacher Comments:", 10, 95);
+doc.rect(10,100,170,40);
 
-doc.text("✔ = correct   ❌ = incorrect", 10, 130);
+doc.text("✔ = correct   ❌ = incorrect", 10, 150);
 
-doc.save("Summary_Report.pdf");
+doc.save(`${name}_Summary_Report.pdf`);
 }
 
 </script>
