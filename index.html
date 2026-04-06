@@ -322,120 +322,149 @@ In your answer you will be assessed on how well you:<br>
 
 <script>
 
-// CREATE LINES
+// CREATE INPUTS
 for(let i=1;i<=5;i++){
-    document.getElementById("mainPoints").innerHTML += `
-    <div class="line"><span>${i}.</span><textarea rows="1"></textarea></div>
-    <div class="line"><span></span><textarea rows="1"></textarea></div>`;
+  document.getElementById("mainPoints").innerHTML += `
+  <div class="line">${i}. <textarea></textarea></div>
+  <div class="line"><textarea></textarea></div>`;
 }
 
 for(let i=0;i<15;i++){
-    document.getElementById("summary").innerHTML += `<textarea class="summary-lines"></textarea>`;
+  document.getElementById("summary").innerHTML += `<textarea></textarea>`;
 }
 
+// AUTO EXPAND + ENTER NEXT
+document.addEventListener("input", function(e){
+  if(e.target.tagName==="TEXTAREA"){
+    e.target.style.height="auto";
+    e.target.style.height=e.target.scrollHeight+"px";
+  }
+});
+
+document.addEventListener("keydown", function(e){
+  if(e.key==="Enter" && e.target.tagName==="TEXTAREA"){
+    e.preventDefault();
+    let t=[...document.querySelectorAll("textarea")];
+    let i=t.indexOf(e.target);
+    if(i>-1 && i<t.length-1) t[i+1].focus();
+  }
+});
+
 // TIMER
-let time = 40 * 60;
-let overtime = false;
-
+let time=2400;
 setInterval(()=>{
-    time--;
-    let min = Math.floor(Math.abs(time)/60);
-    let sec = Math.abs(time)%60;
-
-    let display = `${min}:${sec<10?'0'+sec:sec}`;
-
-    if(time <= 0){
-        overtime = true;
-        document.getElementById("timer").classList.add("red");
-    }
-
-    document.getElementById("timer").innerText = display;
+  time--;
+  let m=Math.floor(Math.abs(time)/60);
+  let s=Math.abs(time)%60;
+  if(time<=0) document.getElementById("timer").classList.add("red");
+  document.getElementById("timer").innerText=`${m}:${s<10?'0'+s:s}`;
 },1000);
 
-
-// ANSWER KEY
-const mainPoints = [
-"water is vital",
-"scarcity is relative",
-"crisis is management",
-"importance to economy and culture",
-"need sustainable management"
+// KEYWORDS
+const keywordBank=[
+["vital","important"],
+["scarcity","relative"],
+["management","shortage"],
+["economy","culture"],
+["sustainable","future"]
 ];
 
 function submitTest(){
 
-let inputs = document.querySelectorAll("#mainPoints textarea");
-let summaryInputs = document.querySelectorAll("#summary textarea");
+let inputs=document.querySelectorAll("#mainPoints textarea");
+let summaryInputs=document.querySelectorAll("#summary textarea");
 
-let mpScore = 0;
+let mpScore=0;
+let mpResults=[];
 
 // MARK MAIN POINTS
-inputs.forEach(input=>{
-    let val = input.value.toLowerCase();
-    if(mainPoints.some(p=>val.includes(p))){
-        mpScore++;
-    }
-});
-
-if(mpScore>5) mpScore=5;
-
-// SUMMARY SCORE (basic logic)
-let summaryText = "";
-summaryInputs.forEach(i=>summaryText += i.value + " ");
-
-let wordCount = summaryText.trim().split(/\s+/).length;
-
-let summaryScore = 0;
-
-if(wordCount <= 120){
-    summaryScore = 15 + Math.floor(Math.random()*6); // simulate marking
-} else {
-    summaryScore = 10;
+for(let i=0;i<5;i++){
+  let text=(inputs[i*2].value+" "+inputs[i*2+1].value).toLowerCase();
+  let correct=keywordBank[i].some(w=>text.includes(w));
+  mpResults.push(correct);
+  if(correct) mpScore++;
 }
 
-// TOTAL
-let total = mpScore + summaryScore;
-let percent = Math.round((total/25)*100);
+// SUMMARY
+let summaryText="";
+summaryInputs.forEach(i=>summaryText+=i.value+" ");
 
-// GRADE
-let grade = "F";
+let words=summaryText.trim().split(/\s+/);
+if(words.length>120) words=words.slice(0,120);
+summaryText=words.join(" ");
+
+// SCORE
+let summaryScore=10;
+if(summaryText.includes("water") && summaryText.includes("management")) summaryScore=15;
+if(summaryText.includes("future") && summaryText.includes("scarcity")) summaryScore=18;
+
+let total=mpScore+summaryScore;
+if(total>25) total=25;
+
+let percent=Math.round(total/25*100);
+
+let grade="F";
 if(percent>=85) grade="A";
 else if(percent>=70) grade="B";
 else if(percent>=50) grade="C";
 else if(percent>=40) grade="D";
 else if(percent>=21) grade="E";
 
-// DISPLAY
-document.getElementById("result").innerHTML = `
-<h3>Results</h3>
-Score: ${total}/25 (${percent}%) - Grade ${grade}<br>
-Time Taken: ${document.getElementById("timer").innerText}<br>
-Feedback: Improve clarity, include key ideas, and manage word limit.<br><br>
-<button onclick="downloadPDF('${total}','${percent}','${grade}')">Download PDF Report</button>
-`;
+let name=document.getElementById("studentName").value||"Student";
 
+document.getElementById("result").innerHTML=`
+<h3>Results</h3>
+Name: ${name}<br>
+Score: ${total}/25 (${percent}%) - ${grade}<br>
+Time: ${document.getElementById("timer").innerText}<br>
+<button onclick="downloadPDF('${encodeURIComponent(name)}','${encodeURIComponent(summaryText)}',${JSON.stringify(mpResults)},${total},${percent},'${grade}')">
+Download PDF
+</button>
+`;
 }
 
 // PDF
-function downloadPDF(total, percent, grade){
+function downloadPDF(name,summaryText,mpResults,total,percent,grade){
+
+name=decodeURIComponent(name);
+summaryText=decodeURIComponent(summaryText);
+
 const { jsPDF } = window.jspdf;
-let doc = new jsPDF();
+let doc=new jsPDF();
 
-doc.text("SUMMARY WRITING REPORT", 10, 10);
+doc.text("SUMMARY REPORT",10,10);
+doc.text("Name: "+name,10,20);
 
-doc.text(`Score: ${total}/25`, 10, 20);
-doc.text(`Percentage: ${percent}%`, 10, 30);
-doc.text(`Grade: ${grade}`, 10, 40);
+// MAIN POINTS WITH TEXT
+doc.text("Main Points:",10,30);
+let inputs=document.querySelectorAll("#mainPoints textarea");
 
-doc.text("Teacher Editable Score:", 10, 60);
-doc.rect(10,65,50,10);
+let y=40;
 
-doc.text("Teacher Comments:", 10, 80);
-doc.rect(10,85,150,30);
+for(let i=0;i<5;i++){
+  let text=inputs[i*2].value+" "+inputs[i*2+1].value;
+  let mark=mpResults[i]?"✔":"❌";
+  doc.text(`${i+1}. ${text} ${mark}`,10,y);
+  y+=10;
+}
 
-doc.text("✔ = correct   ❌ = incorrect", 10, 130);
+// SUMMARY
+doc.text("Summary:",10,y+10);
+let split=doc.splitTextToSize(summaryText,180);
+doc.text(split,10,y+20);
 
-doc.save("Summary_Report.pdf");
+// SCORE
+doc.text(`Score: ${total}/25`,10,260);
+doc.text(`Percent: ${percent}% Grade: ${grade}`,10,270);
+
+// EDITABLE BOXES
+doc.rect(10,280,60,10);
+doc.text("Teacher Score",10,278);
+
+doc.rect(80,280,100,15);
+doc.text("Comments",80,278);
+
+doc.save(name+"_Report.pdf");
 }
 
 </script>
