@@ -400,8 +400,7 @@ let summaryInputs=document.querySelectorAll("#summary textarea");
 
 // FIX: ensure markMainPoints returns number
 let contentScore=markMainPoints(inputs);
-if(isNaN(contentScore)) contentScore = 0;
-  
+
 // BUILD SUMMARY
 let summaryText="";
 summaryInputs.forEach(i=>summaryText+=i.value+" ");
@@ -433,29 +432,17 @@ if(contentScore<3) feedback.push("Missing ideas");
 let feedbackText=feedback.join(", ")||"Good work";
 
 let name=document.getElementById("studentName").value||"Student";
-// SAFE VALUES (PREVENT NaN + OBJECT ERRORS)
-let safeContent = (typeof contentScore === "number" && !isNaN(contentScore)) ? contentScore : 0;
-let safeLanguage = (typeof languageScore === "number" && !isNaN(languageScore)) ? languageScore : 0;
-let safeOrganisation = (typeof organisationScore === "number" && !isNaN(organisationScore)) ? organisationScore : 0;
-let safeTotal = (typeof total === "number" && !isNaN(total)) ? total : 0;
-let safePercent = (typeof percent === "number" && !isNaN(percent)) ? percent : 0;
 
-// OPTIONAL: CSEC-style message for extremely low responses
-let finalDisplay = (analysis.wordCount <= 5) 
-  ? "Too limited for grading"
-  : `${safeTotal}/25 (${safePercent}%) Grade: ${grade}`;
-
-// DISPLAY
+// FIXED HTML OUTPUT
 document.getElementById("result").innerHTML=`
 <h3>Results</h3>
 Name: ${name}<br>
-Content: ${safeContent}/5<br>
-Language: ${safeLanguage}/10<br>
-Organisation: ${safeOrganisation}/10<br>
+Content: ${contentScore}/5<br>
+Language: ${languageScore}/10<br>
+Organisation: ${organisationScore}/10<br>
 Word Count: ${analysis.wordCount}<br>
 Feedback: ${feedbackText}<br>
-Final: ${finalDisplay}<br><br>
-`;
+Final: ${total}/25 (${percent}%) Grade: ${grade}<br><br>
 
 <button onclick="downloadPDF(
 '${encodeURIComponent(name)}',
@@ -1802,3 +1789,4 @@ function updateTokens() {
       padding: 20px;
     }
   </style>
+
