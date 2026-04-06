@@ -180,45 +180,27 @@ nav .dropdown {
   <button onclick="showPage('quizzes')">Quizzes</button>
 </nav>
 <div id="quizzes" class="page hidden">
-      <h1>Summary Writing Assessment One</h1>
- <!DOCTYPE html>
+     <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Summary Writing Test</title>
 
-<!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.plugin.acroform.min.js"></script>
 
 <style>
-body {
-    font-family: Arial, sans-serif;
-    background:#f4f7fb;
-    padding:20px;
-}
-.container {
-    max-width:900px;
-    margin:auto;
-    background:white;
-    padding:25px;
-    border-radius:10px;
-}
-.timer {
-    text-align:center;
-    font-size:22px;
-    font-weight:bold;
-}
+body {font-family: Arial;background:#f4f7fb;margin:0;padding:20px;}
+.container {max-width:900px;margin:auto;background:white;padding:25px;border-radius:10px;box-shadow:0 0 10px rgba(0,0,0,0.1);}
+h2 {text-align:center;}
+.timer {text-align:center;font-size:22px;font-weight:bold;margin-bottom:20px;}
 .red {color:red;}
-textarea {
-    width:100%;
-    border:none;
-    border-bottom:2px solid #000;
-    font-size:18px;
-}
-.line {display:flex; gap:10px;}
-.plan-box {border:2px dashed #aaa; padding:10px;}
-button {width:100%; padding:12px; background:#007bff; color:white;}
+.passage {white-space:pre-line;text-align:justify;}
+textarea {width:100%;border:none;border-bottom:2px solid #000;resize:none;outline:none;font-size:20px;padding:4px;background:transparent;}
+.plan-box {border:2px dashed #aaa;padding:10px;margin:20px 0;}
+.line {display:flex;gap:10px;margin-bottom:10px;}
+.line span {width:18px;}
+button {background:#007bff;color:white;padding:12px;border:none;border-radius:6px;cursor:pointer;width:100%;margin-top:20px;}
 </style>
 </head>
 
@@ -229,23 +211,22 @@ button {width:100%; padding:12px; background:#007bff; color:white;}
 <div class="timer" id="timer">40:00</div>
 
 <b>Name:</b>
-<input type="text" id="studentName" style="width:100%;padding:10px;">
+<input type="text" id="studentName" style="width:100%;padding:10px;margin-bottom:15px;">
 
-<h3>Water Passage</h3>
+<h2>Section A - SUMMARY WRITING</h2>
 
-<div class="passage">
-Imagine that you get up in the morning with the sweet sound of rain against the windows. You look out and the world sings to you. Water makes it possible. Crystal clear water is available right in the comfort of your home. Shortage is not even in the back of your mind because you know that the process of getting that water to you is in the hands of responsible persons. Some forecasts show that by 2025 more than 3 billion people will face water scarcity, but this is not because the world lacks water. The world water crisis is a crisis of management – not one of scarcity. At the global scale, there is enough water to provide “water security” for all, but only if we change the way we manage and develop it. The scarcity of water is a very relative concept that can only be seriously addressed by looking at a basket of factors, including socioeconomic, technical and institutional aspects of water use. <br> Water is important to our national economies, our leisure and even to our culture. The sustainable management of water resources is of central importance to poverty alleviation, people’s health and the protection of the environment. The best initiatives are those that make a political commitment to consider water as an integral part of sustainable human development, and those which strive to adapt management of the resources to the needs of the poor. Our culture and lifestyles are key factors in the inequitable distribution of water. Changes in attitude and actions will bring about a positive difference, even when those attitudes and actions are as simple as realizing the value of water and remembering conservation practices. Our water use must be through sustainable practices with the aim of safeguarding this resource for our future generations. <br> There is no quick fix or simple solution when it comes to safeguarding and managing a resource that is in as much demand as water. It is evident that to maintain our most precious resource, our managerial capacity has to be upgraded since the current strategies were developed for past human and natural needs and are now inappropriate to our present needs. <div> <br> Adapted from 'Global Environment Outlook for Youth in the Caribbean – A Vision for Change!' p. 69 </div> </div>
-</div>
+<h3>Water</h3>
 
-<div class="plan-box">
+<div class="passage" id="passage">
+Imagine that you get up in the morning with the sweet sound of rain against the windows. You look out and the world sings to you. Water makes it possible. Crystal clear water is available right in the comfort of your home. Shortage is not even in the back of your mind because you know that the process of getting that water to you is in the hands of responsible persons. Some forecasts show that by 2025 more than 3 billion people will face water scarcity, but this is not because the world lacks water. The world water crisis is a crisis of management – not one of scarcity. At the global scale, there is enough water to provide “water security” for all, but only if we change the way we manage and develop it. The scarcity of water is a very relative concept that can only be seriously addressed by looking at a basket of factors, including socioeconomic, technical and institutional aspects of water use. <br> Water is important to our national economies, our leisure and even to our culture. The sustainable management of water resources is of central importance to poverty alleviation, people’s health and the protection of the environment. The best initiatives are those that make a political commitment to consider water as an integral part of sustainable human development, and those which strive to adapt management of the resources to the needs of the poor. Our culture and lifestyles are key factors in the inequitable distribution of water. Changes in attitude and actions will bring about a positive difference, even when those attitudes and actions are as simple as realizing the value of water and remembering conservation practices. Our water use must be through sustainable practices with the aim of safeguarding this resource for our future generations. <br> There is no quick fix or simple solution when it comes to safeguarding and managing a resource that is in as much demand as water. It is evident that to maintain our most precious resource, our managerial capacity has to be upgraded since the current strategies were developed for past human and natural needs and are now inappropriate to our present needs. <div> <br> Adapted from Global Environment Outlook for Youth in the Caribbean – A Vision for Change! p. 69 </div> </div>
 <b>Planning (not marked)</b>
 <textarea></textarea>
 </div>
 
-<h4>Main Points (5)</h4>
+<h4>Main Points (5 marks)</h4>
 <div id="mainPoints"></div>
 
-<h4>Summary (20)</h4>
+<h4>Summary (20 marks)</h4>
 <div id="summary"></div>
 
 <button onclick="submitTest()">Submit</button>
@@ -257,17 +238,8 @@ Imagine that you get up in the morning with the sweet sound of rain against the 
 <script>
 
 // CREATE INPUTS
-let mpDiv = document.getElementById("mainPoints");
-let summaryDiv = document.getElementById("summary");
-
 for(let i=1;i<=5;i++){
-  mpDiv.innerHTML += `
-  <div class="line">${i}. <textarea></textarea></div>
-  <div class="line"><textarea></textarea></div>`;
-}
-
-for(let i=0;i<15;i++){
-  summaryDiv.innerHTML += `<textarea></textarea>`;
+  mainPoints.innerHTML += `<div class="line">${i}. <textarea></textarea></div><div class="line"><textarea></textarea></div>`;
 }
 for(let i=0;i<15;i++){
   summary.innerHTML += `<textarea></textarea>`;
@@ -280,103 +252,107 @@ setInterval(()=>{
   let m=Math.floor(Math.abs(time)/60);
   let s=Math.abs(time)%60;
   if(time<=0) timer.classList.add("red");
- document.getElementById("timer").innerText = `${m}:${s<10?'0'+s:s}`;
+  timer.innerText=`${m}:${s<10?'0'+s:s}`;
 },1000);
 
-// MAIN POINT KEYWORDS
-const keywordBank = [
-["vital","important"],
-["scarcity","relative"],
-["management","crisis"],
-["economy","culture"],
-["sustainable","future"]
+// IDEA BANK
+const ideas=[
+"management not shortage",
+"enough water exists",
+"scarcity depends on factors",
+"important to economy culture health",
+"sustainable management",
+"reduce poverty environment",
+"attitudes affect use",
+"conservation important",
+"future generations",
+"systems outdated"
 ];
 
+// MAIN POINTS
+function markMainPoints(inputs){
+ let score=0;
+ let results=[];
+ for(let i=0;i<5;i++){
+   let text=(inputs[i*2].value+" "+inputs[i*2+1].value).toLowerCase();
+   let hit=ideas.some(i=>text.includes(i.split(" ")[0]));
+   results.push(hit);
+   if(hit) score++;
+ }
+ return {score,results};
+}
+
+// SUMMARY ANALYSIS
+function analyze(text){
+ let clean=text.toLowerCase();
+ let words=clean.trim().split(/\s+/).filter(w=>w);
+ let wordCount=words.length;
+
+ // CONTENT (10)
+ let content=0;
+ ideas.forEach(i=>{
+   if(clean.includes(i.split(" ")[0])) content++;
+ });
+ content=Math.min(content,10);
+
+ // LIFTING
+ let passage=document.getElementById("passage").innerText.toLowerCase();
+ let lifted=words.filter(w=>passage.includes(w)).length;
+ let ratio=lifted/(words.length||1);
+ if(ratio>0.6) content=Math.max(0,content-4);
+
+ // LANGUAGE (5)
+ let sentences=text.split(/[.!?]/).filter(s=>s.trim());
+ let language=5;
+ if(sentences.length<2) language-=2;
+ if(ratio>0.5) language-=1;
+ language=Math.max(0,language);
+
+ // ORGANISATION (5)
+ let organisation=5;
+ if(sentences.length<2) organisation-=2;
+ if(words.length<40) organisation-=1;
+ organisation=Math.max(0,organisation);
+
+ return {content,language,organisation,wordCount};
+}
+
+// WORD CAP
+function capScore(total,words){
+ if(words<=5) return Math.min(total,1);
+ if(words<=10) return Math.min(total,4);
+ if(words<=25) return Math.min(total,7);
+ if(words<=59) return Math.min(total,9);
+ if(words<=80) return Math.min(total,14);
+ return total;
+}
+
+// SUBMIT
 function submitTest(){
 
 let inputs=document.querySelectorAll("#mainPoints textarea");
 let summaryInputs=document.querySelectorAll("#summary textarea");
 
-// MAIN POINT MARKING
-let mpScore=0;
-let mpResults=[];
+// MAIN POINTS
+let mp=markMainPoints(inputs);
 
-for(let i=0;i<5;i++){
-let text=(inputs[i*2].value+" "+inputs[i*2+1].value).toLowerCase();
-let correct=keywordBank[i].some(w=>text.includes(w));
-mpResults.push(correct);
-if(correct) mpScore++;
-}
+// SUMMARY TEXT
+let text="";
+summaryInputs.forEach(i=>text+=i.value+" ");
 
-// BUILD SUMMARY
-let summaryText="";
-summaryInputs.forEach(i=>summaryText+=i.value+" ");
+// ANALYZE
+let a=analyze(text);
 
-let words=summaryText.trim().split(/\s+/);
-if(words.length>120) words=words.slice(0,120);
-summaryText=words.join(" ");
+// SUMMARY MARK
+let summaryMark=a.content+a.language+a.organisation;
 
-// ==========================
-// HUMAN-LIKE MARKING (NOW CORRECTLY INSIDE FUNCTION)
-// ==========================
-
-let cleanSummary = summaryText.toLowerCase();
-let cleanWords = cleanSummary.replace(/[^\w\s]/g,"").split(/\s+/);
-
-// CONTENT
-let ideaBank = [
-["vital","important","essential"],
-["scarcity","relative","shortage"],
-["management","crisis"],
-["economy","culture"],
-["sustainable","future"]
-];
-
-let contentScore = 0;
-ideaBank.forEach(group=>{
-if(group.some(w=>cleanSummary.includes(w))) contentScore++;
-});
-
-// ORGANISATION
-let organisationScore = 0;
-let sentences = summaryText.split(/[.!?]/).filter(s=>s.trim());
-
-if(sentences.length>=3) organisationScore+=3;
-if(cleanSummary.includes("however")||cleanSummary.includes("therefore")) organisationScore+=2;
-if(sentences.length>=4) organisationScore+=2;
-
-let uniqueRatio=new Set(cleanWords).size/cleanWords.length;
-if(uniqueRatio>0.6) organisationScore+=3;
-
-if(organisationScore>10) organisationScore=10;
-
-// LANGUAGE
-let languageScore = 0;
-if(sentences.length>=3) languageScore+=2;
-if(summaryText.match(/[.,]/)) languageScore+=2;
-if(summaryText.match(/[A-Z]/)) languageScore+=2;
-if(!summaryText.includes("  ")) languageScore+=2;
-if(new Set(cleanWords).size>40) languageScore+=2;
-
-if(languageScore>10) languageScore=10;
-
-let summaryScore = organisationScore + languageScore;
-
-// WORD CAP
-let cap=25;
-if(words.length<=5) cap=1;
-else if(words.length<=10) cap=4;
-else if(words.length<=25) cap=7;
-else if(words.length<=59) cap=9;
-else if(words.length<=80) cap=14;
-
-// FINAL
-let total = contentScore + summaryScore;
-if(total>cap) total=cap;
-if(total>25) total=25;
+// TOTAL
+let total=mp.score+summaryMark;
+total=capScore(total,a.wordCount);
 
 let percent=Math.round(total/25*100);
 
+// GRADE
 let grade="F";
 if(percent>=85) grade="A";
 else if(percent>=70) grade="B";
@@ -384,58 +360,16 @@ else if(percent>=50) grade="C";
 else if(percent>=40) grade="D";
 else if(percent>=21) grade="E";
 
-let name=document.getElementById("studentName").value||"Student";
-
 // DISPLAY
-document.getElementById("result").innerHTML=`
+result.innerHTML=`
 <h3>Results</h3>
-Name: ${name}<br>
-Score: ${total}/25 (${percent}%) - ${grade}<br>
-Content: ${contentScore}/5<br>
-Organisation: ${organisationScore}/10<br>
-Language: ${languageScore}/10<br>
-Word Count: ${words.length}<br>
-<button onclick='downloadPDF(
-"${encodeURIComponent(name)}",
-"${encodeURIComponent(summaryText)}",
-${JSON.stringify(mpResults)},
-${total},
-${percent},
-"${grade}"
-)'>
-
-Download PDF
-</button>
-}
-// PDF
-function downloadPDF(name,summaryText,mpResults,total,percent,grade){
-name = decodeURIComponent(name);
-summaryText = decodeURIComponent(summaryText);
-const { jsPDF } = window.jspdf;
-let doc=new jsPDF();
-
-doc.text("SUMMARY REPORT",10,10);
-doc.text("Name: "+name,10,20);
-
-let inputs=document.querySelectorAll("#mainPoints textarea");
-
-let y=30;
-
-for(let i=0;i<5;i++){
-let text=(inputs[i*2].value+" "+inputs[i*2+1].value).trim();
-if(!text) text="[No response]";
-let mark=mpResults[i]?"Correct":"Incorrect";
-doc.text(`${i+1}. ${text} (${mark})`,10,y);
-y+=10;
-}
-
-doc.text("Summary:",10,y+10);
-doc.text(doc.splitTextToSize(summaryText,180),10,y+20);
-
-doc.text(`Score: ${total}/25`,10,260);
-doc.text(`Percent: ${percent}% Grade: ${grade}`,10,270);
-
-doc.save(name+"_Report.pdf");
+Main Points: ${mp.score}/5<br>
+Content: ${a.content}/10<br>
+Language: ${a.language}/5<br>
+Organisation: ${a.organisation}/5<br>
+Word Count: ${a.wordCount}<br><br>
+Final: ${total}/25 (${percent}%) - ${grade}
+`;
 }
 
 </script>
