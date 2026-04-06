@@ -433,14 +433,12 @@ Organisation: ${organisationScore}/10<br>
 Word Count: ${analysis.wordCount}<br>
 Feedback: ${feedbackText}<br>
 Final: ${total}/25 (${percent}%)<br>
-<button onclick="downloadPDF('${encodeURIComponent(name)}','${encodeURIComponent(summaryText)}',${JSON.stringify(mpResults)},${total},${percent},'${grade}')">
-Download PDF
-</button>
+<button onclick="downloadPDF('${encodeURIComponent(name)}','${encodeURIComponent(summaryText)}',${total},${percent},'${feedbackText}')">Download PDF</button>
 `;
 }
 
-// PDF
-function downloadPDF(name,summaryText,mpResults,total,percent,grade){
+// PDF (FIXED)
+function downloadPDF(name,summaryText,total,percent,feedbackText){
 
 name=decodeURIComponent(name);
 summaryText=decodeURIComponent(summaryText);
