@@ -441,7 +441,7 @@ for(let i=0;i<5;i++){
   }
 
   // REMOVE EMOJI (they cause rendering bugs)
-  let mark = mpResults[i] ? "Correct✔" : "Incorrect X";
+  let mark = mpResults[i] ? "Correct-✔" : "Incorrect- X";
 
   // FINAL STRING (clean ASCII only)
   let output = `${i+1}. ${text} (${mark})`;
@@ -476,7 +476,7 @@ commentField.Rect = [80, 280, 100, 20];
 commentField.T = "Comments";
 commentField.V = "";
 doc.addField(commentField);
-doc.text("Comments:", 80, 275);
+doc.text("Comments:", 40, 275);
 
 doc.save(name+"_Report.pdf");
 }
