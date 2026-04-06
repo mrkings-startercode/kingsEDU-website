@@ -186,9 +186,7 @@ nav .dropdown {
 <meta charset="UTF-8">
 <title>Summary Writing Test</title>
 
-<!-- jsPDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.plugin.acroform.min.js"></script>
+
 
 <style>
 body {
@@ -342,9 +340,18 @@ setInterval(()=>{
   if(time<=0) document.getElementById("timer").classList.add("red");
   document.getElementById("timer").innerText=`${m}:${s<10?'0'+s:s}`;
 },1000);
-let GLOBAL_DATA = {};
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.plugin.acroform.min.js"></script>
+
+<script>
+
 // =============================
-// 1. IDEA BANK (REAL IDEAS)
+// GLOBAL STORAGE (SAFE)
+// =============================
+let GLOBAL_DATA = {};
+
+// =============================
+// IDEA BANK
 // =============================
 const ideaBank = [
 "management not scarcity",
@@ -360,11 +367,10 @@ const ideaBank = [
 ];
 
 // =============================
-// 2. MAIN POINTS MARKING (5)
+// MAIN POINTS MARKING
 // =============================
 function markMainPoints(inputs){
-  let score=0;
-  let results=[];
+  let score=0, results=[];
 
   for(let i=0;i<5;i++){
     let text=(inputs[i*2].value+" "+inputs[i*2+1].value).toLowerCase();
@@ -381,7 +387,7 @@ function markMainPoints(inputs){
 }
 
 // =============================
-// 3. SUMMARY ANALYSIS
+// SUMMARY ANALYSIS
 // =============================
 function analyzeSummary(text){
 
@@ -393,36 +399,32 @@ function analyzeSummary(text){
 
   let language = 5;
   if(sentences.length < 2) language -= 2;
-  language = Math.max(0, language);
 
   let organisation = 5;
   if(sentences.length < 2) organisation -= 2;
   if(words.length < 40) organisation -= 1;
-  organisation = Math.max(0, organisation);
 
   return {
-    language,
-    organisation,
+    language: Math.max(0, language),
+    organisation: Math.max(0, organisation),
     wordCount
   };
 }
 
 // =============================
-// 4. STRICT WORD CAP
+// WORD CAP
 // =============================
 function applyWordCap(total, wordCount){
-
   if(wordCount <=5) return Math.min(total,1);
   if(wordCount <=10) return Math.min(total,4);
   if(wordCount <=25) return Math.min(total,7);
   if(wordCount <=59) return Math.min(total,9);
   if(wordCount <=80) return Math.min(total,14);
-
   return total;
 }
 
 // =============================
-// 5. SUBMIT FUNCTION
+// SUBMIT FUNCTION (FIXED)
 // =============================
 function submitTest(){
 
@@ -598,6 +600,7 @@ doc.text("Comments:",80,265);
 doc.save(d.name+"_Report.pdf");
 
 }
+
 </script>
 
 </body>
