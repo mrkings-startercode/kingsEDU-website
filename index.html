@@ -496,22 +496,7 @@ Organisation: ${organisationScore}/10<br>
 Language: ${languageScore}/10<br>
 Word Count: ${words.length}<br>
 Time: ${document.getElementById("timer").innerText}<br>
-Feedback: ${feedback.join(" ")}<br><br>
-
-<button onclick="downloadPDF(
-'${encodeURIComponent(name)}',
-'${encodeURIComponent(summaryText)}',
-${JSON.stringify(mpResults)},
-${total},
-${percent},
-'${grade}',
-${contentScore},
-${organisationScore},
-${languageScore},
-${words.length},
-'${encodeURIComponent(feedback.join(" "))}'
-)">
-Download PDF
+Feedback: ${feedback.join(" ")}<br>
 </button>
 `;
 }
