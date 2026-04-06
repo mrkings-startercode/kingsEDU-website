@@ -400,7 +400,7 @@ let summaryInputs=document.querySelectorAll("#summary textarea");
 
 // FIX: ensure contentScore is ALWAYS a number
 let rawContent = markMainPoints(inputs);
-let contentScore = (typeof rawContent === "number") ? rawContent : (rawContent?.score || 0);
+let contentScore = (typeof rawContent === "object") ? rawContent.score : rawContent;
 if(isNaN(contentScore)) contentScore = 0;
 
 // BUILD SUMMARY
