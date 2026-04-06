@@ -1,6 +1,301 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Summary Writing Assessment One</title>
+  <style>
+    .dropdown {
+  display: inline-block;
+  position: relative;
+}
+
+.dropbtn {
+  background: #2677e0;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f4f8fb;
+  min-width: 250px;
+  box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+  border-radius: 5px;
+  z-index: 1;
+  text-align: left;
+}
+
+.dropdown-content a {
+  color: #241e25;
+  padding: 10px 15px;
+  text-decoration: none;
+  display: block;
+  font-weight: bold;
+}
+
+.dropdown-content a:hover {
+  background-color: #6795c7;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f4f8fb;
+      font-size: 21px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1, h2, h3 {
+      text-align: center;
+    }
+    nav {
+      margin-bottom: 20px;
+      text-align: center;
+      nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px; /* space between buttons */
+}
+nav .dropdown {
+  margin: 0 10px;
+}
+    }
+    nav button {
+      margin: 5px;
+      padding: 10px 15px;
+    }
+    .hidden {
+      display: none;
+    }
+    .question, .paragraph {
+      margin-bottom: 20px;
+    }
+    .paragraph {
+      background-color: #eef6ff;
+      padding: 15px;
+      border-left: 5px solid #007acc;
+      border-radius: 5px;
+      user-select: text;
+    }
+    .highlight-box {
+      display: inline-block;
+      padding: 2px 4px;
+      border-radius: 5px;
+      margin: 2px;
+      transition: background-color 0.3s, box-shadow 0.3s;
+    }
+    .main-idea { background-color: #d4b5ff; }
+    .other-info-1 { background-color: #c1f0d6; }
+    .other-info-2 { background-color: #fdf5a6; }
+    .other-info-3 { background-color: #f9c5d1; }
+    .other-info-4 { background-color: #add8e6; }
+    .highlighted {
+      box-shadow: 0 0 8px 3px #ff9800;
+      filter: brightness(1.2);
+    }
+    button {
+      background: #007acc;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+      margin-right: 10px;
+    }
+    .result, .name-section {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+    .name-section input {
+      padding: 5px;
+      font-size: 16px;
+      margin-right: 10px;
+    }
+    .icon {
+      font-weight: bold;
+      font-size: 20px;
+    }
+    #leaderboard {
+      margin-top: 20px;
+      display: none;
+      border-top: 2px solid #007acc;
+      padding-top: 10px;
+    }
+    #popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    #popupContent {
+      background-color: white;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+    }
+  </style>
+
+  <div id="popup">
+    <div id="popupContent">
+      <div style="font-size: 28px; font-weight: bold; color: #007acc;"></div>
+      <h2>Welcome to King's Royal Learning Website</h2>
+      <button onclick="closePopup()">Start</button>
+    </div>
+  </div>
+
+  <div class="container">
+   <nav>
+  <button onclick="showPage('home')">Home</button>
+  <div class="dropdown">
+    <button class="dropbtn">Lessons</button>
+    <div class="dropdown-content">
+      <a href="#" onclick="showPage('lessons')">Summary Skills</a>
+      <a href="technique2.html" target="_blank">Persuasive Writing Skills</a>
+      <a href="comprehension.html" target="_blank">Comprehension Tasks</a>
+    </div>
+  </div>
+  <button onclick="showPage('quizzes')">Quizzes</button>
+</nav>
+<div id="quizzes" class="page hidden">
+      <h1>Summary Writing Assessment One</h1>
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Summary Writing Test</title>
+
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background:#f4f7fb;
+    margin:0;
+    padding:20px;
+}
+.container {
+    max-width:900px;
+    margin:auto;
+    background:white;
+    padding:25px;
+    border-radius:10px;
+    box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+h2 {text-align:center;}
+
+.timer {
+    text-align:center;
+    font-size:22px;
+    font-weight:bold;
+    margin-bottom:20px;
+}
+.red {color:red;}
+
+.passage {
+    white-space:pre-line;
+    text-align:justify;
+}
+
+textarea {
+    width:100%;
+    border:none;
+    border-bottom:1px solid #000;
+    resize:none;
+    outline:none;
+    font-size:14px;
+    padding:5px;
+    background:transparent;
+}
+
+.plan-box {
+    border:2px dashed #aaa;
+    padding:10px;
+    margin:20px 0;
+}
+
+.line {
+    display:flex;
+    gap:10px;
+    margin-bottom:10px;
+}
+.line span {
+    width:20px;
+}
+
+.summary-lines textarea {
+    height:25px;
+}
+
+button {
+    background:#007bff;
+    color:white;
+    padding:12px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    width:100%;
+    margin-top:20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="timer" id="timer">40:00</div>
+
+<h2>Section A<br>SUMMARY WRITING</h2>
+
+<p><b>(Suggested time: 35 minutes)</b></p>
+
+<p>
+You MUST answer the question in this section.<br><br>
+
+1. Read carefully the following magazine article on the use of water and write a summary of it in NOT MORE THAN 120 words. As far as possible use your own words. If the limit is exceeded, only the first 120 words of your answer will be read and assessed.<br><br>
+
+Your summary must be in continuous prose.<br><br>
+
+You may make notes or plan your summary in your answer booklet.<br><br>
+
+In your answer you will be assessed on how well you:<br>
+(a) identify main ideas<br>
+(b) organize ideas<br>
+(c) use language effectively
+</p>
+
+<h3>Water</h3>
+
+<div class="passage">
+Imagine that you get up in the morning with the sweet sound of rain against the windows. You look out and the world sings to you. Water makes it possible. Crystal clear water is available right in the comfort of your home. Shortage is not even in the back of your mind because you know that the process of getting that water to you is in the hands of responsible persons. Some forecasts show that by 2025 more than 3 billion people will face water scarcity, but this is not because the world lacks water. The world water crisis is a crisis of management – not one of scarcity. At the global scale, there is enough water to provide “water security” for all, but only if we change the way we manage and develop it. The scarcity of water is a very relative concept that can only be seriously addressed by looking at a basket of factors, including socioeconomic, technical and institutional aspects of water use. <br> Water is important to our national economies, our leisure and even to our culture. The sustainable management of water resources is of central importance to poverty alleviation, people’s health and the protection of the environment. The best initiatives are those that make a political commitment to consider water as an integral part of sustainable human development, and those which strive to adapt management of the resources to the needs of the poor. Our culture and lifestyles are key factors in the inequitable distribution of water. Changes in attitude and actions will bring about a positive difference, even when those attitudes and actions are as simple as realizing the value of water and remembering conservation practices. Our water use must be through sustainable practices with the aim of safeguarding this resource for our future generations. <br> There is no quick fix or simple solution when it comes to safeguarding and managing a resource that is in as much demand as water. It is evident that to maintain our most precious resource, our managerial capacity has to be upgraded since the current strategies were developed for past human and natural needs and are now inappropriate to our present needs. <br> Adapted from Global Environment Outlook for Youth in the Caribbean – A Vision for Change! p. 69
+</div>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
 <meta charset="UTF-8">
 <title>Summary Writing Test</title>
 
@@ -31,7 +326,7 @@ button {width:100%;padding:12px;background:#007bff;color:white;border:none;}
 <h2>Section A - Summary Writing</h2>
 
 <div class="passage">
-Imagine that you get up in the morning with the sweet sound of rain against the windows. You look out and the world sings to you. Water makes it possible. Crystal clear water is available right in the comfort of your home. Shortage is not even in the back of your mind because you know that the process of getting that water to you is in the hands of responsible persons. Some forecasts show that by 2025 more than 3 billion people will face water scarcity, but this is not because the world lacks water. The world water crisis is a crisis of management – not one of scarcity. At the global scale, there is enough water to provide “water security” for all, but only if we change the way we manage and develop it. The scarcity of water is a very relative concept that can only be seriously addressed by looking at a basket of factors, including socioeconomic, technical and institutional aspects of water use. <br> Water is important to our national economies, our leisure and even to our culture. The sustainable management of water resources is of central importance to poverty alleviation, people’s health and the protection of the environment. The best initiatives are those that make a political commitment to consider water as an integral part of sustainable human development, and those which strive to adapt management of the resources to the needs of the poor. Our culture and lifestyles are key factors in the inequitable distribution of water. Changes in attitude and actions will bring about a positive difference, even when those attitudes and actions are as simple as realizing the value of water and remembering conservation practices. Our water use must be through sustainable practices with the aim of safeguarding this resource for our future generations. <br> There is no quick fix or simple solution when it comes to safeguarding and managing a resource that is in as much demand as water. It is evident that to maintain our most precious resource, our managerial capacity has to be upgraded since the current strategies were developed for past human and natural needs and are now inappropriate to our present needs. <br> Adapted from Global Environment Outlook for Youth in the Caribbean – A Vision for Change! p. 69
+Water is vital to life...
 </div>
 
 <div class="plan-box">
@@ -193,11 +488,6 @@ doc.save(name+"_Report.pdf");
 }
 
 </script>
-</body>
-</html>
-
-</script>
-
 </body>
 </html>
   <div>
@@ -1456,5 +1746,3 @@ function updateTokens() {
   </style>
 
 
-
-    
