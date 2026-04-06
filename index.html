@@ -357,34 +357,162 @@ function submitTest(){
 let inputs=document.querySelectorAll("#mainPoints textarea");
 let summaryInputs=document.querySelectorAll("#summary textarea");
 
-let mpScore=0;
-let mpResults=[];
+// ==========================
+// HUMAN-LIKE CSEC MARKING
+// ==========================
 
-// MARK MAIN POINTS
-for(let i=0;i<5;i++){
-  let text=(inputs[i*2].value+" "+inputs[i*2+1].value).toLowerCase();
-  let correct=keywordBank[i].some(w=>text.includes(w));
-  mpResults.push(correct);
-  if(correct) mpScore++;
+// CLEAN TEXT
+let cleanSummary = summaryText.toLowerCase();
+
+// REMOVE punctuation for analysis
+let cleanWords = cleanSummary.replace(/[^\w\s]/g,"").split(/\s+/);
+
+// ==========================
+// CONTENT (0–5) — IDEA MATCHING
+// ==========================
+
+let ideaBank = [
+["vital","important","essential"],
+["scarcity","relative","shortage"],
+["management","mismanagement","crisis"],
+["economy","culture","health","development"],
+["sustainable","future","conservation","generations"]
+];
+
+let contentScore = 0;
+let matchedIdeas = [];
+
+ideaBank.forEach(group=>{
+    let found = group.some(word=>cleanSummary.includes(word));
+    matchedIdeas.push(found);
+    if(found) contentScore++;
+});
+
+// prevent repetition cheating
+let uniqueMatches = matchedIdeas.filter(x=>x===true).length;
+contentScore = uniqueMatches;
+
+
+// ==========================
+// PARAPHRASING CHECK (ANTI-LIFT)
+// ==========================
+
+// detect copying chunks from passage
+let passagePhrases = [
+"water makes it possible",
+"crisis of management",
+"no quick fix",
+"sustainable management of water"
+];
+
+let lifted = passagePhrases.some(p=>cleanSummary.includes(p));
+
+
+// ==========================
+// ORGANISATION (0–10)
+// ==========================
+
+let organisationScore = 0;
+
+let sentences = summaryText.split(/[.!?]/).filter(s=>s.trim().length>0);
+
+// logical flow
+if(sentences.length >= 3) organisationScore += 3;
+
+// linking devices
+let linkers = ["however","therefore","because","although","furthermore","moreover"];
+let linkerCount = linkers.filter(w => cleanSummary.includes(w)).length;
+if(linkerCount >= 1) organisationScore += 2;
+
+// sequencing clarity
+if(sentences.length >= 4) organisationScore += 2;
+
+// coherence (avoid repetition)
+let uniqueRatio = new Set(cleanWords).size / cleanWords.length;
+if(uniqueRatio > 0.65) organisationScore += 3;
+
+if(organisationScore > 10) organisationScore = 10;
+
+
+// ==========================
+// LANGUAGE (0–10)
+// ==========================
+
+let languageScore = 0;
+
+// sentence structure
+if(sentences.length >= 3) languageScore += 2;
+
+// punctuation use
+if(summaryText.match(/[.,]/)) languageScore += 2;
+
+// capitalization
+if(summaryText.match(/[A-Z]/)) languageScore += 2;
+
+// grammar approximation
+if(!summaryText.includes("  ")) languageScore += 2;
+
+// vocabulary range
+if(new Set(cleanWords).size > 45) languageScore += 2;
+
+// PENALISE LIFTING (very important CSEC rule)
+if(lifted){
+    languageScore -= 2;
 }
 
-// SUMMARY
-let summaryText="";
-summaryInputs.forEach(i=>summaryText+=i.value+" ");
+if(languageScore < 0) languageScore = 0;
+if(languageScore > 10) languageScore = 10;
 
-let words=summaryText.trim().split(/\s+/);
-if(words.length>120) words=words.slice(0,120);
-summaryText=words.join(" ");
 
-// SCORE
-let summaryScore=10;
-if(summaryText.includes("water") && summaryText.includes("management")) summaryScore=15;
-if(summaryText.includes("future") && summaryText.includes("scarcity")) summaryScore=18;
+// ==========================
+// SUMMARY SCORE (20)
+// ==========================
 
-let total=mpScore+summaryScore;
-if(total>25) total=25;
+let summaryScore = organisationScore + languageScore;
 
-let percent=Math.round(total/25*100);
+
+// ==========================
+// WORD COUNT CAPS (STRICT)
+// ==========================
+
+let finalCap = 25;
+
+if(words.length <= 5){
+    finalCap = 1;
+}
+else if(words.length <= 10){
+    finalCap = 4;
+}
+else if(words.length <= 25){
+    finalCap = 7;
+}
+else if(words.length <= 59){
+    finalCap = 9;
+}
+else if(words.length <= 80){
+    finalCap = 14;
+}
+
+
+// ==========================
+// FINAL TOTAL
+// ==========================
+
+let total = contentScore + summaryScore;
+
+// apply cap
+if(total > finalCap){
+    total = finalCap;
+}
+
+if(total > 25) total = 25;
+
+
+// ==========================
+// GRADE
+// ==========================
+
+let percent = Math.round((total/25)*100);
 
 let grade="F";
 if(percent>=85) grade="A";
@@ -393,31 +521,79 @@ else if(percent>=50) grade="C";
 else if(percent>=40) grade="D";
 else if(percent>=21) grade="E";
 
+
+// ==========================
+// FEEDBACK (SMART)
+// ==========================
+
+let feedback = [];
+
+if(contentScore < 4){
+    feedback.push("Include more key ideas from the passage.");
+}
+if(organisationScore < 6){
+    feedback.push("Improve logical flow and use linking words.");
+}
+if(languageScore < 6){
+    feedback.push("Improve grammar, sentence structure, and vocabulary.");
+}
+if(lifted){
+    feedback.push("Avoid copying directly from the passage. Use your own words.");
+}
+if(words.length > 120){
+    feedback.push("Reduce word count. Only first 120 words are marked.");
+}
+
+if(feedback.length === 0){
+    feedback.push("Strong response. Continue refining clarity and conciseness.");
+}
 let name=document.getElementById("studentName").value||"Student";
 
 document.getElementById("result").innerHTML=`
 <h3>Results</h3>
 Name: ${name}<br>
 Score: ${total}/25 (${percent}%) - ${grade}<br>
+Content: ${contentScore}/5<br>
+Organisation: ${organisationScore}/10<br>
+Language: ${languageScore}/10<br>
+Word Count: ${words.length}<br>
 Time: ${document.getElementById("timer").innerText}<br>
-<button onclick="downloadPDF('${encodeURIComponent(name)}','${encodeURIComponent(summaryText)}',${JSON.stringify(mpResults)},${total},${percent},'${grade}')">
+Feedback: ${feedback.join(" ")}<br><br>
+
+<button onclick="downloadPDF(
+'${encodeURIComponent(name)}',
+'${encodeURIComponent(summaryText)}',
+${JSON.stringify(mpResults)},
+${total},
+${percent},
+'${grade}',
+${contentScore},
+${organisationScore},
+${languageScore},
+${words.length},
+'${encodeURIComponent(feedback.join(" "))}'
+)">
 Download PDF
 </button>
 `;
 }
 
 // PDF
-function downloadPDF(name,summaryText,mpResults,total,percent,grade){
-
+function downloadPDF(name,summaryText,mpResults,total,percent,grade,contentScore,organisationScore,languageScore,wordCount,feedback){
 name=decodeURIComponent(name);
 summaryText=decodeURIComponent(summaryText);
+feedback = decodeURIComponent(feedback);
 
 const { jsPDF } = window.jspdf;
 let doc=new jsPDF();
-
-doc.text("SUMMARY REPORT",10,10);
-doc.text("Name: "+name,10,20);
-
+doc.text(`Score: ${total}/25`,10,250);
+doc.text(`Content: ${contentScore}/5`,10,258);
+doc.text(`Organisation: ${organisationScore}/10`,10,266);
+doc.text(`Language: ${languageScore}/10`,10,274);
+doc.text(`Word Count: ${wordCount}`,10,282);
+doc.text("Feedback:",10,290);
+let fb = doc.splitTextToSize(feedback,180);
+doc.text(fb,10,300);
 // MAIN POINTS WITH TEXT
 doc.text("Main Points:",10,30);
 let inputs=document.querySelectorAll("#mainPoints textarea");
