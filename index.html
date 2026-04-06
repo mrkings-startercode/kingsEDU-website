@@ -344,6 +344,7 @@ setInterval(()=>{
 },1000);
 
 <script>
+<script>
 
 // =============================
 // 1. IDEA BANK (REAL IDEAS)
@@ -391,51 +392,18 @@ function analyzeSummary(text){
   let words = clean.trim().split(/\s+/).filter(w=>w);
   let wordCount = words.length;
 
-  // CONTENT (10 marks)
-  let content=0;
-  ideaBank.forEach(idea=>{
-    let hit = idea.split(" ").some(word => clean.includes(word));
-    if(hit) content++;
-  });
-  content = Math.min(content,10);
-
-  // LIFTING DETECTION
-  let passage = document.querySelector(".passage").innerText.toLowerCase();
-  let liftedWords=0;
-
-  words.forEach(w=>{
-    if(passage.includes(w)) liftedWords++;
-  });
-
-  let liftRatio = liftedWords / (words.length || 1);
-
-  if(liftRatio > 0.6){
-    content = Math.max(content - 4, 0); // heavy penalty
-  }
-
-  // LANGUAGE (5 marks)
   let sentences = text.split(/[.!?]/).filter(s=>s.trim().length>3);
+
   let language = 5;
-
   if(sentences.length < 2) language -= 2;
-  if(liftRatio > 0.5) language -= 1;
+  language = Math.max(0, language);
 
-  language = Math.max(0, Math.min(5, language));
-
-  // ORGANISATION (5 marks)
   let organisation = 5;
-
   if(sentences.length < 2) organisation -= 2;
   if(words.length < 40) organisation -= 1;
-
-  if(!text.includes(",") && !text.includes("and")){
-    organisation -=1;
-  }
-
   organisation = Math.max(0, organisation);
 
   return {
-    content,
     language,
     organisation,
     wordCount
@@ -443,7 +411,7 @@ function analyzeSummary(text){
 }
 
 // =============================
-// 4. STRICT WORD CAP (CSEC RULE)
+// 4. STRICT WORD CAP
 // =============================
 function applyWordCap(total, wordCount){
 
@@ -457,7 +425,7 @@ function applyWordCap(total, wordCount){
 }
 
 // =============================
-// 5. NEW submitTest FUNCTION
+// 5. SUBMIT FUNCTION
 // =============================
 function submitTest(){
 
@@ -474,36 +442,20 @@ summaryInputs.forEach(i=>summaryText+=i.value+" ");
 let words=summaryText.trim().split(/\s+/);
 if(words.length>120) words=words.slice(0,120);
 summaryText=words.join(" ");
-let feedbackList = [];
 
-if(analysis.wordCount < 40) feedbackList.push("Summary too short.");
-if(analysis.language < 3) feedbackList.push("Improve sentence structure.");
-if(analysis.organisation < 3) feedbackList.push("Improve organisation and flow.");
-if(contentScore < 3) feedbackList.push("Missing key ideas.");
-
-if(feedbackList.length === 0){
-  feedbackList.push("Good summary with clear structure.");
-}
-
-// Convert to string for display
-let feedbackText = feedbackList.join(" ");
-// ANALYZE
+// ANALYZE FIRST (FIXED)
 let analysis = analyzeSummary(summaryText);
 
-// CONTENT MUST MATCH MAIN POINTS
-let contentScore = mp.score; // out of 5
+// SCORES
+let contentScore = mp.score; // MUST MATCH MAIN POINTS
 
-// SCALE LANGUAGE + ORGANISATION TO /10 EACH
 let languageScore = Math.round((analysis.language / 5) * 10);
 let organisationScore = Math.round((analysis.organisation / 5) * 10);
 
-// TOTAL SUMMARY (now out of 25 BEFORE cap)
-let summaryScore = contentScore + languageScore + organisationScore;
+// TOTAL OUT OF 25 (FIXED — NO DOUBLE COUNT)
+let total = contentScore + languageScore + organisationScore;
 
-// TOTAL (25)
-let total = mp.score + summaryScore;
-
-// APPLY WORD LIMIT CAP
+// APPLY CAP
 total = applyWordCap(total, analysis.wordCount);
 
 let percent=Math.round(total/25*100);
@@ -516,104 +468,84 @@ else if(percent>=50) grade="C";
 else if(percent>=40) grade="D";
 else if(percent>=21) grade="E";
 
+// FEEDBACK (NOW IN RIGHT PLACE)
+let feedbackList = [];
+
+if(analysis.wordCount < 40) feedbackList.push("Summary too short.");
+if(languageScore < 5) feedbackList.push("Improve sentence structure.");
+if(organisationScore < 5) feedbackList.push("Improve organisation.");
+if(contentScore < 3) feedbackList.push("Missing key ideas.");
+
+if(feedbackList.length === 0){
+  feedbackList.push("Good summary with clear structure.");
+}
+
+let feedbackText = feedbackList.join(" ");
+
 let name=document.getElementById("studentName").value||"Student";
 
-// OUTPUT (WITH FULL BREAKDOWN)
+// OUTPUT
 document.getElementById("result").innerHTML=`
 <h3>Results</h3>
 Name: ${name}<br><br>
 
 Main Points: ${mp.score}/5<br>
-
-Content: ${analysis.content}/10<br>
-Language: ${analysis.language}/5<br>
-Organisation: ${analysis.organisation}/5<br>
+Content: ${contentScore}/5<br>
+Language: ${languageScore}/10<br>
+Organisation: ${organisationScore}/10<br>
 
 Word Count: ${analysis.wordCount}<br><br>
-Feedback:${feedbackText}${feedbackText}<br>
-Final Score: ${total}/25 (${percent}%) - ${grade}<br>
 
+<b>Feedback:</b><br>${feedbackText}<br><br>
+
+Final Score: ${total}/25 (${percent}%) - ${grade}<br><br>
 
 <button onclick="downloadPDF('${encodeURIComponent(name)}','${encodeURIComponent(summaryText)}',${JSON.stringify(mp.results)},${total},${percent},'${grade}', ${contentScore}, ${languageScore}, ${organisationScore}, '${encodeURIComponent(feedbackText)}')">
+Download PDF
+</button>
 `;
 }
 
-// PDF
-  
-function downloadPDF(name,summaryText,mpResults,total,percent,grade,contentScore,languageScore,organisationScore,feedbackText)
+// =============================
+// 6. PDF FUNCTION (FIXED)
+// =============================
+function downloadPDF(name,summaryText,mpResults,total,percent,grade,contentScore,languageScore,organisationScore,feedbackText){
+
 name=decodeURIComponent(name);
 summaryText=decodeURIComponent(summaryText);
-feedbackText = decodeURIComponent(feedbackText);
+feedbackText=decodeURIComponent(feedbackText);
+
 const { jsPDF } = window.jspdf;
 let doc=new jsPDF();
 
-doc.text("SUMMARY REPORT",10,10);
-doc.text("Name: "+name,10,20);
+let y=10;
 
-// MAIN POINTS WITH TEXT
-doc.text("Main Points:",10,30);
-let inputs=document.querySelectorAll("#mainPoints textarea");
+doc.text("SUMMARY REPORT",10,y);
+y+=10;
 
-let y=40;
+doc.text("Name: "+name,10,y);
+y+=10;
 
-for(let i=0;i<5;i++){
+// BREAKDOWN
+doc.text(`Main Points: ${contentScore}/5`,10,y); y+=8;
+doc.text(`Content: ${contentScore}/5`,10,y); y+=8;
+doc.text(`Language: ${languageScore}/10`,10,y); y+=8;
+doc.text(`Organisation: ${organisationScore}/10`,10,y); y+=10;
 
-  let line1 = inputs[i*2].value || "";
-  let line2 = inputs[i*2+1].value || "";
+// FINAL
+doc.text(`Final Score: ${total}/25`,10,y); y+=8;
+doc.text(`Percent: ${percent}% Grade: ${grade}`,10,y); y+=12;
 
-  // CLEAN TEXT HARD
-  let text = (line1 + " " + line2)
-    .replace(/\r?\n|\r/g, "")   // remove line breaks
-    .replace(/\s+/g, " ")       // normalize spaces
-    .trim();
-
-  // FORCE SAFE TEXT (prevents jsPDF weird rendering)
-  if(text.length === 0){
-      text = "[No response]";
-  }
-
-  // REMOVE EMOJI (they cause rendering bugs)
-  let mark = mpResults[i] ? "Correct-✔" : "Incorrect- X";
-
-  // FINAL STRING (clean ASCII only)
-  let output = `${i+1}. ${text} (${mark})`;
-
-  doc.text(output, 10, y);
-
-  y += 10;
-}
-// SUMMARY
-doc.text("Summary:",10,y+10);
-let split=doc.splitTextToSize(summaryText,180);
-doc.text(split,10,y+20);
-
-// SCORE
-doc.text(`Score: ${total}/25`,10,260);
-doc.text(`Percent: ${percent}% Grade: ${grade}`,10,270);
-doc.text("Feedback:",10,y);
-y += 8;
-
+// FEEDBACK
+doc.text("Feedback:",10,y); y+=8;
 let feedbackLines = doc.splitTextToSize(feedbackText,180);
 doc.text(feedbackLines,10,y);
-y += feedbackLines.length * 7;
-// EDITABLE BOXES
-// CREATE REAL EDITABLE FIELDS
+y += feedbackLines.length * 7 + 5;
 
-// Teacher Score Field
-let scoreField = new doc.AcroFormTextField();
-scoreField.Rect = [10, 280, 60, 10];
-scoreField.T = "TeacherScore";
-scoreField.V = "";
-doc.addField(scoreField);
-doc.text("Teacher Score:", 10, 285);
-
-// Comments Field
-let commentField = new doc.AcroFormTextField();
-commentField.Rect = [80, 280, 100, 20];
-commentField.T = "Comments";
-commentField.V = "";
-doc.addField(commentField);
-doc.text("Comments:", 40, 270);
+// SUMMARY
+doc.text("Summary:",10,y); y+=8;
+let split=doc.splitTextToSize(summaryText,180);
+doc.text(split,10,y);
 
 doc.save(name+"_Report.pdf");
 }
