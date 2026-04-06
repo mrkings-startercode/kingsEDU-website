@@ -377,103 +377,11 @@ if(words.length>120) words=words.slice(0,120);
 summaryText=words.join(" ");
 
 // SCORE
-// ==========================
-// HUMAN-LIKE CSEC MARKING
-// ==========================
+let summaryScore=10;
+if(summaryText.includes("water") && summaryText.includes("management")) summaryScore=15;
+if(summaryText.includes("future") && summaryText.includes("scarcity")) summaryScore=18;
 
-// CLEAN TEXT
-let cleanSummary = summaryText.toLowerCase();
-let cleanWords = cleanSummary.replace(/[^\w\s]/g,"").split(/\s+/);
-
-// ---------- CONTENT (0–5)
-let ideaBank = [
-["vital","important","essential"],
-["scarcity","relative","shortage"],
-["management","mismanagement","crisis"],
-["economy","culture","health","development"],
-["sustainable","future","conservation","generations"]
-];
-
-let contentScore = 0;
-ideaBank.forEach(group=>{
-    if(group.some(word=>cleanSummary.includes(word))){
-        contentScore++;
-    }
-});
-
-// ---------- PARAPHRASING CHECK
-let lifted = ["crisis of management","no quick fix"].some(p=>cleanSummary.includes(p));
-
-// ---------- ORGANISATION (0–10)
-let organisationScore = 0;
-let sentences = summaryText.split(/[.!?]/).filter(s=>s.trim().length>0);
-
-if(sentences.length >= 3) organisationScore += 3;
-
-let linkers = ["however","therefore","because","although"];
-if(linkers.some(w=>cleanSummary.includes(w))) organisationScore += 2;
-
-if(sentences.length >= 4) organisationScore += 2;
-
-let uniqueRatio = new Set(cleanWords).size / cleanWords.length;
-if(uniqueRatio > 0.65) organisationScore += 3;
-
-if(organisationScore > 10) organisationScore = 10;
-
-// ---------- LANGUAGE (0–10)
-let languageScore = 0;
-
-if(sentences.length >= 3) languageScore += 2;
-if(summaryText.match(/[.,]/)) languageScore += 2;
-if(summaryText.match(/[A-Z]/)) languageScore += 2;
-if(!summaryText.includes("  ")) languageScore += 2;
-if(new Set(cleanWords).size > 45) languageScore += 2;
-
-if(lifted) languageScore -= 2;
-
-if(languageScore < 0) languageScore = 0;
-if(languageScore > 10) languageScore = 10;
-
-// ---------- SUMMARY SCORE
-let summaryScore = organisationScore + languageScore;
-
-// ---------- WORD COUNT CAPS
-let finalCap = 25;
-
-if(words.length <= 5) finalCap = 1;
-else if(words.length <= 10) finalCap = 4;
-else if(words.length <= 25) finalCap = 7;
-else if(words.length <= 59) finalCap = 9;
-else if(words.length <= 80) finalCap = 14;
-
-// ---------- FINAL TOTAL
-let total = contentScore + summaryScore;
-
-if(total > finalCap) total = finalCap;
-if(total > 25) total = 25;
-
-// ---------- GRADE
-let percent = Math.round((total/25)*100);
-
-let grade="F";
-if(percent>=85) grade="A";
-else if(percent>=70) grade="B";
-else if(percent>=50) grade="C";
-else if(percent>=40) grade="D";
-else if(percent>=21) grade="E";
-
-// ---------- FEEDBACK
-let feedback = [];
-
-if(contentScore < 4) feedback.push("Include more key ideas.");
-if(organisationScore < 6) feedback.push("Improve organisation.");
-if(languageScore < 6) feedback.push("Improve language use.");
-if(lifted) feedback.push("Avoid copying from passage.");
-if(words.length > 120) feedback.push("Reduce word count.");
-
-if(feedback.length === 0){
-    feedback.push("Strong response.");
-}
+let total=mpScore+summaryScore;
 if(total>25) total=25;
 
 let percent=Math.round(total/25*100);
@@ -491,18 +399,15 @@ document.getElementById("result").innerHTML=`
 <h3>Results</h3>
 Name: ${name}<br>
 Score: ${total}/25 (${percent}%) - ${grade}<br>
-Content: ${contentScore}/5<br>
-Organisation: ${organisationScore}/10<br>
-Language: ${languageScore}/10<br>
-Word Count: ${words.length}<br>
 Time: ${document.getElementById("timer").innerText}<br>
-Feedback: ${feedback.join(" ")}<br>
+<button onclick="downloadPDF('${encodeURIComponent(name)}','${encodeURIComponent(summaryText)}',${JSON.stringify(mpResults)},${total},${percent},'${grade}')">
+Download PDF
 </button>
 `;
 }
 
 // PDF
-function downloadPDF(name,summaryText,mpResults,total,percent,grade,contentScore,organisationScore,languageScore,wordCount,feedback){
+function downloadPDF(name,summaryText,mpResults,total,percent,grade){
 
 name=decodeURIComponent(name);
 summaryText=decodeURIComponent(summaryText);
