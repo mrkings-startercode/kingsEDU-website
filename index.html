@@ -398,8 +398,10 @@ function submitTest(){
 let inputs=document.querySelectorAll("#mainPoints textarea");
 let summaryInputs=document.querySelectorAll("#summary textarea");
 
-// FIX: ensure markMainPoints returns number
-let contentScore=markMainPoints(inputs);
+// FIX: ensure contentScore is ALWAYS a number
+let rawContent = markMainPoints(inputs);
+let contentScore = (typeof rawContent === "number") ? rawContent : (rawContent?.score || 0);
+if(isNaN(contentScore)) contentScore = 0;
 
 // BUILD SUMMARY
 let summaryText="";
@@ -407,17 +409,20 @@ summaryInputs.forEach(i=>summaryText+=i.value+" ");
 
 let analysis=analyzeSummary(summaryText);
 
-// FIX: use proper scaling already out of 10
-let languageScore=analysis.language;
-let organisationScore=analysis.organisation;
+// FIX: ensure numbers
+let languageScore = (typeof analysis.language === "number") ? analysis.language : 0;
+let organisationScore = (typeof analysis.organisation === "number") ? analysis.organisation : 0;
 
 // TOTAL
-let total=contentScore+languageScore+organisationScore;
+let total = contentScore + languageScore + organisationScore;
+if(isNaN(total)) total = 0;
 
 // APPLY WORD CAP
 total=applyWordCap(total,analysis.wordCount);
+if(isNaN(total)) total = 0;
 
 let percent=Math.round(total/25*100);
+if(isNaN(percent)) percent = 0;
 
 // DEFINE GRADE (FIX)
 let grade = percent>=75?"A":percent>=60?"B":percent>=50?"C":percent>=40?"D":"E";
@@ -433,7 +438,12 @@ let feedbackText=feedback.join(", ")||"Good work";
 
 let name=document.getElementById("studentName").value||"Student";
 
-// FIXED HTML OUTPUT
+// ✅ FINAL DISPLAY FIX (handles extreme low responses)
+let finalDisplay = (analysis.wordCount <= 5)
+  ? "Too limited for grading"
+  : `${total}/25 (${percent}%) Grade: ${grade}`;
+
+// OUTPUT (UNCHANGED STRUCTURE, JUST SAFER VALUES)
 document.getElementById("result").innerHTML=`
 <h3>Results</h3>
 Name: ${name}<br>
@@ -442,7 +452,7 @@ Language: ${languageScore}/10<br>
 Organisation: ${organisationScore}/10<br>
 Word Count: ${analysis.wordCount}<br>
 Feedback: ${feedbackText}<br>
-Final: ${total}/25 (${percent}%) Grade: ${grade}<br><br>
+Final: ${finalDisplay}<br><br>
 
 <button onclick="downloadPDF(
 '${encodeURIComponent(name)}',
@@ -488,12 +498,16 @@ let text=(inputs[i*2].value+" "+inputs[i*2+1].value)
 
 if(text==="") text="[No response]";
 
-// FIX: ensure mpResults exists
+// SAFE CHECK
 let mark = (typeof mpResults !== "undefined" && mpResults[i]) ? "Correct" : "Incorrect";
 
 doc.text(`${i+1}. ${text} (${mark})`,10,y);
 y+=10;
 }
+
+// SAFE VALUES FOR PDF
+if(isNaN(total)) total = 0;
+if(isNaN(percent)) percent = 0;
 
 // SCORES
 doc.text("Score: "+total+"/25",10,y); y+=10;
@@ -509,7 +523,7 @@ doc.text("Summary:",10,y); y+=8;
 let split=doc.splitTextToSize(summaryText,180);
 doc.text(split,10,y);
 
-// ===== EDITABLE FIELDS (FIXED PROPERLY) =====
+// ===== EDITABLE FIELDS (UNCHANGED, JUST STABLE) =====
 
 // Teacher Score
 let scoreField = new doc.AcroFormTextField();
