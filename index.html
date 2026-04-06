@@ -333,8 +333,7 @@ document.addEventListener("keydown", function(e){
   }
 });
 
-
-// TIMER (FIXED)
+// TIMER
 let time=2400;
 setInterval(()=>{
   time--;
@@ -344,191 +343,247 @@ setInterval(()=>{
   document.getElementById("timer").innerText=`${m}:${s<10?'0'+s:s}`;
 },1000);
 
-// IDEA BANK
-const ideaBank=[
+<script>
+<script>
+
+// =============================
+// 1. IDEA BANK (REAL IDEAS)
+// =============================
+const ideaBank = [
 "management not scarcity",
 "enough water globally",
+"scarcity depends on factors",
+"water important economy culture health",
 "sustainable management",
-"future generations"
+"reduce poverty environment",
+"attitudes affect use",
+"conservation practices",
+"future generations",
+"systems outdated"
 ];
 
-// MAIN POINTS
+// =============================
+// 2. MAIN POINTS MARKING (5)
+// =============================
 function markMainPoints(inputs){
-let score=0,results=[];
-for(let i=0;i<5;i++){
-let text=(inputs[i*2].value+" "+inputs[i*2+1].value).toLowerCase();
-let match=ideaBank.some(idea=>text.includes(idea.split(" ")[0]));
-results.push(match);
-if(match) score++;
-}
-return {score,results};
+  let score=0;
+  let results=[];
+
+  for(let i=0;i<5;i++){
+    let text=(inputs[i*2].value+" "+inputs[i*2+1].value).toLowerCase();
+
+    let match = ideaBank.some(idea =>
+      idea.split(" ").some(word => text.includes(word))
+    );
+
+    results.push(match);
+    if(match) score++;
+  }
+
+  return {score, results};
 }
 
-// ANALYSIS
+// =============================
+// 1. IDEA BANK (REAL IDEAS)
+// =============================
+const ideaBank = [
+"management not scarcity",
+"enough water globally",
+"scarcity depends on factors",
+"water important economy culture health",
+"sustainable management",
+"reduce poverty environment",
+"attitudes affect use",
+"conservation practices",
+"future generations",
+"systems outdated"
+];
+
+// =============================
+// 2. MAIN POINTS MARKING (5)
+// =============================
+function markMainPoints(inputs){
+  let score=0;
+  let results=[];
+
+  for(let i=0;i<5;i++){
+    let text=(inputs[i*2].value+" "+inputs[i*2+1].value).toLowerCase();
+
+    let match = ideaBank.some(idea =>
+      idea.split(" ").some(word => text.includes(word))
+    );
+
+    results.push(match);
+    if(match) score++;
+  }
+
+  return {score, results};
+}
+
+// =============================
+// 3. SUMMARY ANALYSIS
+// =============================
 function analyzeSummary(text){
-let words=text.trim().split(/\s+/);
-let sentences=text.split(/[.!?]/).filter(s=>s.trim().length>3);
 
-let language=5;
-if(sentences.length<2) language-=2;
+  let clean=text.toLowerCase().replace(/[^\w\s]/g,"");
+  let words = clean.trim().split(/\s+/).filter(w=>w);
+  let wordCount = words.length;
 
-let organisation=5;
-if(sentences.length<2) organisation-=2;
+  let sentences = text.split(/[.!?]/).filter(s=>s.trim().length>3);
 
-return{
-language:Math.max(0,language),
-organisation:Math.max(0,organisation),
-wordCount:words.length
-};
+  let language = 5;
+  if(sentences.length < 2) language -= 2;
+  language = Math.max(0, language);
+
+  let organisation = 5;
+  if(sentences.length < 2) organisation -= 2;
+  if(words.length < 40) organisation -= 1;
+  organisation = Math.max(0, organisation);
+
+  return {
+    language,
+    organisation,
+    wordCount
+  };
 }
 
-// WORD CAP
-function applyWordCap(total,w){
-if(w<=5) return Math.min(total,1);
-if(w<=10) return Math.min(total,4);
-if(w<=25) return Math.min(total,7);
-if(w<=59) return Math.min(total,9);
-if(w<=80) return Math.min(total,14);
-return total;
+// =============================
+// 4. STRICT WORD CAP
+// =============================
+function applyWordCap(total, wordCount){
+
+  if(wordCount <=5) return Math.min(total,1);
+  if(wordCount <=10) return Math.min(total,4);
+  if(wordCount <=25) return Math.min(total,7);
+  if(wordCount <=59) return Math.min(total,9);
+  if(wordCount <=80) return Math.min(total,14);
+
+  return total;
 }
 
-// SUBMIT (FIXED)
-// SUBMIT (FIXED)
+// =============================
+// 5. SUBMIT FUNCTION
+// =============================
 function submitTest(){
 
 let inputs=document.querySelectorAll("#mainPoints textarea");
 let summaryInputs=document.querySelectorAll("#summary textarea");
 
-// FIX: ensure markMainPoints returns number
-let contentScore=markMainPoints(inputs);
+// MAIN POINTS
+let mp = markMainPoints(inputs);
 
-// BUILD SUMMARY
+// SUMMARY TEXT
 let summaryText="";
 summaryInputs.forEach(i=>summaryText+=i.value+" ");
 
-let analysis=analyzeSummary(summaryText);
+let words=summaryText.trim().split(/\s+/);
+if(words.length>120) words=words.slice(0,120);
+summaryText=words.join(" ");
 
-// FIX: use proper scaling already out of 10
-let languageScore=analysis.language;
-let organisationScore=analysis.organisation;
+// ANALYZE FIRST (FIXED)
+let analysis = analyzeSummary(summaryText);
 
-// TOTAL
-let total=contentScore+languageScore+organisationScore;
+// SCORES
+let contentScore = mp.score; // MUST MATCH MAIN POINTS
 
-// APPLY WORD CAP
-total=applyWordCap(total,analysis.wordCount);
+let languageScore = Math.round((analysis.language / 5) * 10);
+let organisationScore = Math.round((analysis.organisation / 5) * 10);
+
+// TOTAL OUT OF 25 (FIXED — NO DOUBLE COUNT)
+let total = contentScore + languageScore + organisationScore;
+
+// APPLY CAP
+total = applyWordCap(total, analysis.wordCount);
 
 let percent=Math.round(total/25*100);
 
-// DEFINE GRADE (FIX)
-let grade = percent>=75?"A":percent>=60?"B":percent>=50?"C":percent>=40?"D":"E";
+// GRADE
+let grade="F";
+if(percent>=85) grade="A";
+else if(percent>=70) grade="B";
+else if(percent>=50) grade="C";
+else if(percent>=40) grade="D";
+else if(percent>=21) grade="E";
 
-// FEEDBACK
-let feedback=[];
-if(analysis.wordCount<40) feedback.push("Too short");
-if(languageScore<5) feedback.push("Weak language");
-if(organisationScore<5) feedback.push("Poor organisation");
-if(contentScore<3) feedback.push("Missing ideas");
+// FEEDBACK (NOW IN RIGHT PLACE)
+let feedbackList = [];
 
-let feedbackText=feedback.join(", ")||"Good work";
+if(analysis.wordCount < 40) feedbackList.push("Summary too short.");
+if(languageScore < 5) feedbackList.push("Improve sentence structure.");
+if(organisationScore < 5) feedbackList.push("Improve organisation.");
+if(contentScore < 3) feedbackList.push("Missing key ideas.");
+
+if(feedbackList.length === 0){
+  feedbackList.push("Good summary with clear structure.");
+}
+
+let feedbackText = feedbackList.join(" ");
 
 let name=document.getElementById("studentName").value||"Student";
 
-// FIXED HTML OUTPUT
+// OUTPUT
 document.getElementById("result").innerHTML=`
 <h3>Results</h3>
-Name: ${name}<br>
+Name: ${name}<br><br>
+
+Main Points: ${mp.score}/5<br>
 Content: ${contentScore}/5<br>
 Language: ${languageScore}/10<br>
 Organisation: ${organisationScore}/10<br>
-Word Count: ${analysis.wordCount}<br>
-Feedback: ${feedbackText}<br>
-Final: ${total}/25 (${percent}%) Grade: ${grade}<br><br>
 
-<button onclick="downloadPDF(
-'${encodeURIComponent(name)}',
-'${encodeURIComponent(summaryText)}',
-${total},
-${percent},
-'${feedbackText}',
-'${grade}'
-)">Download PDF</button>
+Word Count: ${analysis.wordCount}<br><br>
+
+<b>Feedback:</b><br>${feedbackText}<br><br>
+
+Final Score: ${total}/25 (${percent}%) - ${grade}<br><br>
+
+<button onclick="downloadPDF('${encodeURIComponent(name)}','${encodeURIComponent(summaryText)}',${JSON.stringify(mp.results)},${total},${percent},'${grade}', ${contentScore}, ${languageScore}, ${organisationScore}, '${encodeURIComponent(feedbackText)}')">
+Download PDF
+</button>
 `;
-
 }
 
-
-// PDF (FULLY FIXED + EDITABLE FIELDS RESTORED)
-function downloadPDF(name,summaryText,total,percent,feedbackText,grade){
+// =============================
+// 6. PDF FUNCTION (FIXED)
+// =============================
+function downloadPDF(name,summaryText,mpResults,total,percent,grade,contentScore,languageScore,organisationScore,feedbackText){
 
 name=decodeURIComponent(name);
 summaryText=decodeURIComponent(summaryText);
+feedbackText=decodeURIComponent(feedbackText);
 
 const { jsPDF } = window.jspdf;
 let doc=new jsPDF();
 
-// REQUIRED FOR FORM FIELDS
-doc.initForm();
+let y=10;
 
-// HEADER
-doc.text("SUMMARY REPORT",10,10);
-doc.text("Name: "+name,10,20);
-
-// MAIN POINTS
-doc.text("Main Points:",10,30);
-
-let inputs=document.querySelectorAll("#mainPoints textarea");
-let y=40;
-
-for(let i=0;i<5;i++){
-
-let text=(inputs[i*2].value+" "+inputs[i*2+1].value)
-.replace(/\r?\n|\r/g,"")
-.replace(/\s+/g," ")
-.trim();
-
-if(text==="") text="[No response]";
-
-// FIX: ensure mpResults exists
-let mark = (typeof mpResults !== "undefined" && mpResults[i]) ? "Correct" : "Incorrect";
-
-doc.text(`${i+1}. ${text} (${mark})`,10,y);
+doc.text("SUMMARY REPORT",10,y);
 y+=10;
-}
 
-// SCORES
-doc.text("Score: "+total+"/25",10,y); y+=10;
-doc.text("Percent: "+percent+"%",10,y); y+=10;
-doc.text("Grade: "+grade,10,y); y+=10;
+doc.text("Name: "+name,10,y);
+y+=10;
+
+// BREAKDOWN
+doc.text(`Main Points: ${contentScore}/5`,10,y); y+=8;
+doc.text(`Content: ${contentScore}/5`,10,y); y+=8;
+doc.text(`Language: ${languageScore}/10`,10,y); y+=8;
+doc.text(`Organisation: ${organisationScore}/10`,10,y); y+=10;
+
+// FINAL
+doc.text(`Final Score: ${total}/25`,10,y); y+=8;
+doc.text(`Percent: ${percent}% Grade: ${grade}`,10,y); y+=12;
 
 // FEEDBACK
 doc.text("Feedback:",10,y); y+=8;
-doc.text(feedbackText,10,y); y+=10;
+let feedbackLines = doc.splitTextToSize(feedbackText,180);
+doc.text(feedbackLines,10,y);
+y += feedbackLines.length * 7 + 5;
 
 // SUMMARY
 doc.text("Summary:",10,y); y+=8;
 let split=doc.splitTextToSize(summaryText,180);
 doc.text(split,10,y);
 
-// ===== EDITABLE FIELDS (FIXED PROPERLY) =====
-
-// Teacher Score
-let scoreField = new doc.AcroFormTextField();
-scoreField.Rect = [10, 270, 60, 10];
-scoreField.T = "TeacherScore";
-scoreField.V = "";
-doc.addField(scoreField);
-doc.text("Teacher Score:", 10, 265);
-
-// Comments
-let commentField = new doc.AcroFormTextField();
-commentField.Rect = [80, 270, 110, 20];
-commentField.T = "Comments";
-commentField.V = "";
-doc.addField(commentField);
-doc.text("Comments:", 80, 265);
-
-// SAVE
 doc.save(name+"_Report.pdf");
 }
 </script>
@@ -1790,4 +1845,3 @@ function updateTokens() {
       padding: 20px;
     }
   </style>
-
