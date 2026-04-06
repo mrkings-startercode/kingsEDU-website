@@ -384,6 +384,43 @@ function markMainPoints(inputs){
 }
 
 // =============================
+// 1. IDEA BANK (REAL IDEAS)
+// =============================
+const ideaBank = [
+"management not scarcity",
+"enough water globally",
+"scarcity depends on factors",
+"water important economy culture health",
+"sustainable management",
+"reduce poverty environment",
+"attitudes affect use",
+"conservation practices",
+"future generations",
+"systems outdated"
+];
+
+// =============================
+// 2. MAIN POINTS MARKING (5)
+// =============================
+function markMainPoints(inputs){
+  let score=0;
+  let results=[];
+
+  for(let i=0;i<5;i++){
+    let text=(inputs[i*2].value+" "+inputs[i*2+1].value).toLowerCase();
+
+    let match = ideaBank.some(idea =>
+      idea.split(" ").some(word => text.includes(word))
+    );
+
+    results.push(match);
+    if(match) score++;
+  }
+
+  return {score, results};
+}
+
+// =============================
 // 3. SUMMARY ANALYSIS
 // =============================
 function analyzeSummary(text){
@@ -549,7 +586,6 @@ doc.text(split,10,y);
 
 doc.save(name+"_Report.pdf");
 }
-
 </script>
 
 </body>
