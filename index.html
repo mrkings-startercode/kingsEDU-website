@@ -282,7 +282,7 @@ button {
 </div>
 
 <div class="plan-box">
-<b>You may plan your answers but what you write here will not be marked</b>
+<b>You may plan your answers but what you type here will not be marked</b>
 <textarea></textarea>
 </div>
 
@@ -440,7 +440,7 @@ for(let i=0;i<5;i++){
   }
 
   // REMOVE EMOJI (they cause rendering bugs)
-  let mark = mpResults[i] ? "Correct" : "Incorrect";
+  let mark = mpResults[i] ? "Correct✔" : "Incorrect X";
 
   // FINAL STRING (clean ASCII only)
   let output = `${i+1}. ${text} (${mark})`;
