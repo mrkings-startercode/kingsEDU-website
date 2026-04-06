@@ -359,12 +359,12 @@ setInterval(()=>{
 
 
 // ANSWER KEY
-const mainPoints = [
-"water is vital",
-"scarcity is relative",
-"crisis is management",
-"importance to economy and culture",
-"need sustainable management"
+const keywordBank = [
+  ["vital","important","essential"],
+  ["scarcity","relative","different"],
+  ["management","not","shortage"],
+  ["economy","culture","life"],
+  ["sustainable","future","conserve"]
 ];
 
 function submitTest(){
@@ -375,14 +375,40 @@ let summaryInputs = document.querySelectorAll("#summary textarea");
 let mpScore = 0;
 
 // MARK MAIN POINTS
-inputs.forEach(input=>{
-    let val = input.value.toLowerCase();
-    if(mainPoints.some(p=>val.includes(p))){
-        mpScore++;
+let mpScore = 0;
+
+for(let i = 0; i < 5; i++){
+    let line1 = inputs[i*2].value.toLowerCase();
+    let line2 = inputs[i*2+1].value.toLowerCase();
+    let combined = line1 + " " + line2;
+
+    let match = keywordBank[i].some(word => combined.includes(word));
+
+    if(match){
+        mpScore += 1;
+    }
+let penalty = 0;
+
+// penalize if fewer than 4 valid ideas
+if(mpScore < 4){
+    penalty += 2;
+}
+
+// penalize weak summary keywords
+const summaryKeywords = [
+"management","scarcity","water","future","sustainable","economy"
+];
+
+let keywordHits = 0;
+summaryKeywords.forEach(word=>{
+    if(summaryText.toLowerCase().includes(word)){
+        keywordHits++;
     }
 });
 
-if(mpScore>5) mpScore=5;
+if(keywordHits < 3){
+    penalty += 3;
+}
 
 // SUMMARY SCORE (basic logic)
 let summaryText = "";
@@ -393,14 +419,22 @@ let wordCount = summaryText.trim().split(/\s+/).length;
 let summaryScore = 0;
 
 if(wordCount <= 120){
-    summaryScore = 15 + Math.floor(Math.random()*6); // simulate marking
-} else {
-    summaryScore = 10;
+    if(keywordHits >= 5){
+        summaryScore = 18 + Math.floor(Math.random()*3); // top band
+    }
+    else if(keywordHits >= 3){
+        summaryScore = 14 + Math.floor(Math.random()*3); // mid band
+    }
+    else{
+        summaryScore = 10 + Math.floor(Math.random()*3); // low band
+    }
+}else{
+    summaryScore = 8; // penalty for exceeding word limit
 }
 
 // TOTAL
-let total = mpScore + summaryScore;
-let percent = Math.round((total/25)*100);
+let total = mpScore + summaryScore - penalty;
+if(total < 0) total = 0;
 
 // GRADE
 let grade = "F";
@@ -419,16 +453,30 @@ Name: ${name}<br>
 Score: ${total}/25 (${percent}%) - Grade ${grade}<br>
 Time Taken: ${document.getElementById("timer").innerText}<br>
 Feedback: Improve clarity, include key ideas, and manage word limit.<br><br>
-<button onclick="downloadPDF('${name}','${total}','${percent}','${grade}')">Download PDF Report</button>
+<button onclick="downloadPDF(name, total, percent, grade, '${encodeURIComponent(summaryText)}')">
+Download PDF Report
+</button>
 `;
 
 }
 
 // PDF
-function downloadPDF(name, total, percent, grade){
+function downloadPDF(name, total, percent, grade, summaryText){
+  doc.text("Main Points:", 10, 90);
+
+let y = 100;
+
+inputs.forEach((input, i)=>{
+    doc.text(`${i+1}. ${input.value}`, 10, y);
+    y += 8;
+});
+summaryText = decodeURIComponent(summaryText);
 const { jsPDF } = window.jspdf;
 let doc = new jsPDF();
+doc.text("Student Summary:", 10, 120);
 
+let splitText = doc.splitTextToSize(summaryText, 180);
+doc.text(splitText, 10, 130);
 doc.setFontSize(16);
 doc.text("SUMMARY WRITING REPORT", 10, 10);
 
