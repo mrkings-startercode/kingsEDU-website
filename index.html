@@ -572,15 +572,15 @@ name=decodeURIComponent(name);
 summaryText=decodeURIComponent(summaryText);
 feedback = decodeURIComponent(feedback);
 
-doc.text("Feedback:",10,290);
-let fb = doc.splitTextToSize(feedback,180);
-doc.text(fb,10,300);
+
 const { jsPDF } = window.jspdf;
 let doc=new jsPDF();
 
 doc.text("SUMMARY REPORT",10,10);
 doc.text("Name: "+name,10,20);
-
+doc.text("Feedback:",10,290);
+let fb = doc.splitTextToSize(feedback,180);
+doc.text(fb,10,300);
 // MAIN POINTS WITH TEXT
 doc.text("Main Points:",10,30);
 let inputs=document.querySelectorAll("#mainPoints textarea");
