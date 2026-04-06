@@ -474,7 +474,15 @@ summaryText=words.join(" ");
 let analysis = analyzeSummary(summaryText);
 
 // SUMMARY MARK (20)
-let summaryScore = analysis.content + analysis.language + analysis.organisation;
+// CONTENT MUST MATCH MAIN POINTS
+let contentScore = mp.score; // out of 5
+
+// SCALE LANGUAGE + ORGANISATION TO /10 EACH
+let languageScore = Math.round((analysis.language / 5) * 10);
+let organisationScore = Math.round((analysis.organisation / 5) * 10);
+
+// TOTAL SUMMARY (now out of 25 BEFORE cap)
+let summaryScore = contentScore + languageScore + organisationScore;
 
 // TOTAL (25)
 let total = mp.score + summaryScore;
@@ -494,28 +502,33 @@ else if(percent>=21) grade="E";
 
 let name=document.getElementById("studentName").value||"Student";
 
-// OUTPUT (WITH FULL BREAKDOWN)
 document.getElementById("result").innerHTML=`
 <h3>Results</h3>
 Name: ${name}<br><br>
 
 Main Points: ${mp.score}/5<br>
-
-Content: ${analysis.content}/10<br>
-Language: ${analysis.language}/5<br>
-Organisation: ${analysis.organisation}/5<br>
+Content: ${contentScore}/5<br>
+Language: ${languageScore}/10<br>
+Organisation: ${organisationScore}/10<br>
 
 Word Count: ${analysis.wordCount}<br><br>
 
 Final Score: ${total}/25 (${percent}%) - ${grade}<br>
 
-<button onclick="downloadPDF('${encodeURIComponent(name)}','${encodeURIComponent(summaryText)}',${JSON.stringify(mp.results)},${total},${percent},'${grade}')">
+<b>Feedback:</b><br>
+${analysis.wordCount < 40 ? "Summary too short. " : ""}
+${analysis.language < 3 ? "Improve sentence structure. " : ""}
+${analysis.organisation < 3 ? "Improve organisation and flow. " : ""}
+${analysis.content < 3 ? "Missing key ideas. " : ""}
+
+<button onclick="downloadPDF('${encodeURIComponent(name)}','${encodeURIComponent(summaryText)}',${JSON.stringify(mp.results)},${total},${percent},'${grade}', ${contentScore}, ${languageScore}, ${organisationScore})">
 Download PDF
 </button>
 `;
+`;
 }
 // PDF
-function downloadPDF(name,summaryText,mpResults,total,percent,grade){
+function downloadPDF(name,summaryText,mpResults,total,percent,grade,contentScore,languageScore,organisationScore){
 
 name=decodeURIComponent(name);
 summaryText=decodeURIComponent(summaryText);
@@ -523,69 +536,80 @@ summaryText=decodeURIComponent(summaryText);
 const { jsPDF } = window.jspdf;
 let doc=new jsPDF();
 
-doc.text("SUMMARY REPORT",10,10);
-doc.text("Name: "+name,10,20);
+let y = 10;
 
-// MAIN POINTS WITH TEXT
-doc.text("Main Points:",10,30);
-let inputs=document.querySelectorAll("#mainPoints textarea");
+// TITLE
+doc.setFontSize(14);
+doc.text("SUMMARY REPORT",10,y);
 
-let y=40;
+y += 10;
 
-for(let i=0;i<5;i++){
+// NAME
+doc.setFontSize(11);
+doc.text("Name: "+name,10,y);
 
-  let line1 = inputs[i*2].value || "";
-  let line2 = inputs[i*2+1].value || "";
+y += 10;
 
-  // CLEAN TEXT HARD
-  let text = (line1 + " " + line2)
-    .replace(/\r?\n|\r/g, "")   // remove line breaks
-    .replace(/\s+/g, " ")       // normalize spaces
-    .trim();
+// =========================
+// MARK BREAKDOWN (SPACED)
+// =========================
+doc.text("Main Points: " + contentScore + "/5",10,y);
+y += 8;
 
-  // FORCE SAFE TEXT (prevents jsPDF weird rendering)
-  if(text.length === 0){
-      text = "[No response]";
-  }
+doc.text("Content: " + contentScore + "/5",10,y);
+y += 8;
 
-  // REMOVE EMOJI (they cause rendering bugs)
-  let mark = mpResults[i] ? "Correct-✔" : "Incorrect- X";
+doc.text("Language: " + languageScore + "/10",10,y);
+y += 8;
 
-  // FINAL STRING (clean ASCII only)
-  let output = `${i+1}. ${text} (${mark})`;
+doc.text("Organisation: " + organisationScore + "/10",10,y);
+y += 10;
 
-  doc.text(output, 10, y);
+// =========================
+// FINAL SCORE
+// =========================
+doc.text("Final Score: " + total + "/25",10,y);
+y += 8;
 
-  y += 10;
+doc.text("Percent: " + percent + "%   Grade: " + grade,10,y);
+y += 12;
+
+// =========================
+// FEEDBACK
+// =========================
+let feedback = [];
+
+if(contentScore < 3) feedback.push("Missing key ideas.");
+if(languageScore < 5) feedback.push("Weak sentence structure.");
+if(organisationScore < 5) feedback.push("Poor organisation.");
+if(summaryText.split(/\s+/).length < 40) feedback.push("Summary too short.");
+
+if(feedback.length === 0){
+  feedback.push("Good summary with clear structure.");
 }
-// SUMMARY
-doc.text("Summary:",10,y+10);
+
+doc.text("Feedback:",10,y);
+y += 8;
+
+feedback.forEach(f=>{
+  doc.text("- " + f,10,y);
+  y += 7;
+});
+
+y += 5;
+
+// =========================
+// SUMMARY TEXT (WITH SPACE)
+// =========================
+doc.text("Summary:",10,y);
+y += 8;
+
 let split=doc.splitTextToSize(summaryText,180);
-doc.text(split,10,y+20);
+doc.text(split,10,y);
 
-// SCORE
-doc.text(`Score: ${total}/25`,10,260);
-doc.text(`Percent: ${percent}% Grade: ${grade}`,10,270);
-
-// EDITABLE BOXES
-// CREATE REAL EDITABLE FIELDS
-
-// Teacher Score Field
-let scoreField = new doc.AcroFormTextField();
-scoreField.Rect = [10, 280, 60, 10];
-scoreField.T = "TeacherScore";
-scoreField.V = "";
-doc.addField(scoreField);
-doc.text("Teacher Score:", 10, 275);
-
-// Comments Field
-let commentField = new doc.AcroFormTextField();
-commentField.Rect = [80, 280, 100, 20];
-commentField.T = "Comments";
-commentField.V = "";
-doc.addField(commentField);
-doc.text("Comments:", 40, 275);
-
+// =========================
+// SAVE
+// =========================
 doc.save(name+"_Report.pdf");
 }
 
