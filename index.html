@@ -343,11 +343,6 @@ setInterval(()=>{
   document.getElementById("timer").innerText=`${m}:${s<10?'0'+s:s}`;
 },1000);
 
-<script>
-
-// =============================
-// 1. IDEA BANK (REAL IDEAS)
-// =============================
 const ideaBank = [
 "management not scarcity",
 "enough water globally",
@@ -519,8 +514,6 @@ Download PDF
 </button>
 `;
 }
-
-
 // PDF
 function downloadPDF(name,summaryText,mpResults,total,percent,grade){
 
@@ -622,7 +615,7 @@ doc.save(name+"_Report.pdf");
         <button onclick="submitAnswer()">Submit Answer</button>
         <button onclick="clearSelection()">Clear Selection</button>
         <div id="result" class="result"></div>
-      
+     
           <div id="studentScore"></div>
           <div style="margin-top:10px;">
             <input type="password" id="resultsPassword" placeholder="Enter results password">
@@ -741,7 +734,7 @@ doc.save(name+"_Report.pdf");
 </html>
 
     <div id="home" class="page">
-      
+     
       <h2>Welcome to the Home Page of King's Royal Lessons</h2>
     </div>
 
@@ -754,15 +747,15 @@ doc.save(name+"_Report.pdf");
       <div class="paragraph">
         <p>Read the following praragraph below, note where the highligted text is in this passage. <br><br>The main idea of the passage is highlighted below in the text. Finding the main idea, is very important in Summary Writing as a technique. If you notice where the main idea is in this passage below. This shows that though the main idea is often found at the start or the ending of texts; that is not always the case and it is still important to survey the text to ensure that the main idea you have selected captures the essence of what the entire passage is about.</p><br>
   <strong>Example: The Impact of Artificial Intelligence on Jobs</strong><br /><br />
-  Artificial Intelligence (AI) is transforming workplaces and automating many tasks that people used to do. 
-  <span While this creates efficiency,  class="highlight-box" style="background-color: skyblue;">AI is significantly changing job roles and even eliminating some traditional positions.</span> 
+  Artificial Intelligence (AI) is transforming workplaces and automating many tasks that people used to do.
+  <span While this creates efficiency,  class="highlight-box" style="background-color: skyblue;">AI is significantly changing job roles and even eliminating some traditional positions.</span>
   As a result, workers need to adapt by learning new skills. Companies are also reshaping their hiring practices and training programs to match these changes.
 </div>
 
       <p>Instructions: Click the plus (+) signs below to learn more about finding the main idea.</p>
       <p>The main idea tells us what a passage is mostly about. <button onclick="showTip(1)">+</button> <span id="tip1"></span>. It’s the most important point the author wants to share. <button onclick="showTip(2)">+</button> <span id="tip2"></span> The other sentences support or give more information about this idea.  <button onclick="showTip(3)">+</button> <span id="tip3"></span></p>
 <div>
-  
+ 
 
 </div>
       <div id="lesson1Progress"></div>
@@ -772,8 +765,8 @@ doc.save(name+"_Report.pdf");
       <br> <p> Now let's look at this paragraph on "How to build a table" below. <p> <br></p>
       <div class="paragraph">
   <strong>Example: How to Build a Table</strong><br /><br />
-  Building a table requires careful planning and the right materials. 
-  <span class="highlight-box" style="background-color: rgb(255, 164, 255);">The key steps include measuring the wood, cutting it to size, assembling the frame, and securing the legs.</span> 
+  Building a table requires careful planning and the right materials.
+  <span class="highlight-box" style="background-color: rgb(255, 164, 255);">The key steps include measuring the wood, cutting it to size, assembling the frame, and securing the legs.</span>
   After that, sanding and finishing give the table a smooth and polished look. Whether for beginners or experts, following these steps ensures a sturdy and functional piece of furniture.
 </div>
       <p>Finding the main idea becomes easier when you use this formula: <br />  Main Idea = Subject + What the writer says about the subject. <br /> <br /> Using the information you have been learning about Summary writing thus far, which of the following is MOST LIKELY TRUE about finding the main idea?</p>
@@ -964,8 +957,8 @@ doc.save(name+"_Report.pdf");
       <br><p> Now look at this final example paragraph below entitled "Homework"<P><br>
     <div class="paragraph">
   <strong>Example: The Importance of Doing Homework</strong><br /><br />
-  Homework plays a vital role in reinforcing what students learn in class. 
-  <span class="highlight-box" style="background-color: rgb(226, 145, 145);">It helps students practice independently and strengthens their understanding of the material.</span> 
+  Homework plays a vital role in reinforcing what students learn in class.
+  <span class="highlight-box" style="background-color: rgb(226, 145, 145);">It helps students practice independently and strengthens their understanding of the material.</span>
   Additionally, homework teaches responsibility, time management, and critical thinking—skills that are essential for academic and personal success.
 </div>
       <p>Instructions: Use the slider below to explore five key tips about finding the main idea.</p>
@@ -1615,7 +1608,7 @@ doc.save(name+"_Report.pdf");
     // Wall bounce
     if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) dx = -dx;
     if (y + dy < ballRadius) dy = -dy;
-    
+   
 
     // Paddle bounce or miss
     if (y + dy > canvas.height - paddleHeight - 5) {
@@ -1855,7 +1848,3 @@ function updateTokens() {
       padding: 20px;
     }
   </style>
-
-
-
-    
