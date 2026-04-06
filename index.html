@@ -187,6 +187,7 @@ nav .dropdown {
 <title>Summary Writing Test</title>
 
 <!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.plugin.acroform.min.js"></script>
 
 <style>
@@ -341,7 +342,7 @@ setInterval(()=>{
   if(time<=0) document.getElementById("timer").classList.add("red");
   document.getElementById("timer").innerText=`${m}:${s<10?'0'+s:s}`;
 },1000);
-
+let GLOBAL_DATA = {};
 // =============================
 // 1. IDEA BANK (REAL IDEAS)
 // =============================
@@ -425,10 +426,7 @@ function applyWordCap(total, wordCount){
 // =============================
 function submitTest(){
 
-let inputs = document.querySelectorAll("#mainPoints textarea");
-if(inputs.length === 0){
-  console.warn("Main points not found in DOM");
-}
+let inputs=document.querySelectorAll("#mainPoints textarea");
 let summaryInputs=document.querySelectorAll("#summary textarea");
 
 // MAIN POINTS
@@ -442,19 +440,15 @@ let words=summaryText.trim().split(/\s+/);
 if(words.length>120) words=words.slice(0,120);
 summaryText=words.join(" ");
 
-// ANALYZE FIRST (FIXED)
+// ANALYSIS
 let analysis = analyzeSummary(summaryText);
 
 // SCORES
-let contentScore = mp.score; // MUST MATCH MAIN POINTS
+let contentScore = mp.score;
+let languageScore = Math.round((analysis.language/5)*10);
+let organisationScore = Math.round((analysis.organisation/5)*10);
 
-let languageScore = Math.round((analysis.language / 5) * 10);
-let organisationScore = Math.round((analysis.organisation / 5) * 10);
-
-// TOTAL OUT OF 25 (FIXED — NO DOUBLE COUNT)
 let total = contentScore + languageScore + organisationScore;
-
-// APPLY CAP
 total = applyWordCap(total, analysis.wordCount);
 
 let percent=Math.round(total/25*100);
@@ -467,28 +461,38 @@ else if(percent>=50) grade="C";
 else if(percent>=40) grade="D";
 else if(percent>=21) grade="E";
 
-// FEEDBACK (NOW IN RIGHT PLACE)
-let feedbackList = [];
+// FEEDBACK
+let feedback=[];
+if(analysis.wordCount<40) feedback.push("Summary too short.");
+if(languageScore<5) feedback.push("Improve sentence structure.");
+if(organisationScore<5) feedback.push("Improve organisation.");
+if(contentScore<3) feedback.push("Missing key ideas.");
+if(feedback.length===0) feedback.push("Good summary.");
 
-if(analysis.wordCount < 40) feedbackList.push("Summary too short.");
-if(languageScore < 5) feedbackList.push("Improve sentence structure.");
-if(organisationScore < 5) feedbackList.push("Improve organisation.");
-if(contentScore < 3) feedbackList.push("Missing key ideas.");
-
-if(feedbackList.length === 0){
-  feedbackList.push("Good summary with clear structure.");
-}
-
-let feedbackText = feedbackList.join(" ");
+let feedbackText=feedback.join(" ");
 
 let name=document.getElementById("studentName").value||"Student";
 
-// OUTPUT
+// ✅ STORE EVERYTHING SAFELY
+GLOBAL_DATA = {
+  name,
+  summaryText,
+  mpResults: mp.results,
+  contentScore,
+  languageScore,
+  organisationScore,
+  total,
+  percent,
+  grade,
+  feedbackText
+};
+
+// OUTPUT (NO INLINE JSON!)
 document.getElementById("result").innerHTML=`
 <h3>Results</h3>
 Name: ${name}<br><br>
 
-Main Points: ${mp.score}/5<br>
+Main Points: ${contentScore}/5<br>
 Content: ${contentScore}/5<br>
 Language: ${languageScore}/10<br>
 Organisation: ${organisationScore}/10<br>
@@ -499,112 +503,100 @@ Word Count: ${analysis.wordCount}<br><br>
 
 Final Score: ${total}/25 (${percent}%) - ${grade}<br><br>
 
-<button onclick="downloadPDF('${encodeURIComponent(name)}','${encodeURIComponent(summaryText)}',${JSON.stringify(mp.results)},${total},${percent},'${grade}', ${contentScore}, ${languageScore}, ${organisationScore}, '${encodeURIComponent(feedbackText)}')">
-Download PDF
-</button>
+<button id="downloadBtn">Download PDF</button>
 `;
+
+// ✅ SAFE BUTTON HANDLER
+document.getElementById("downloadBtn").addEventListener("click", downloadPDF);
+
 }
 
 // =============================
-// 6. PDF FUNCTION (FIXED)
+// PDF FUNCTION (FULLY FIXED)
 // =============================
-function downloadPDF(name,summaryText,mpResults,total,percent,grade,contentScore,languageScore,organisationScore,feedbackText){
-
-name=decodeURIComponent(name);
-summaryText=decodeURIComponent(summaryText);
-feedbackText=decodeURIComponent(feedbackText);
+function downloadPDF(){
 
 const { jsPDF } = window.jspdf;
 let doc=new jsPDF();
 
-// ✅ REQUIRED FOR EDITABLE FIELDS
+// enable forms
 doc.initForm();
-doc.setFont("Helvetica"); // stabilizes form rendering
+doc.setFont("Helvetica");
 
+let d = GLOBAL_DATA;
 let y=10;
 
+// HEADER
 doc.text("SUMMARY REPORT",10,y); y+=10;
-doc.text("Name: "+name,10,y); y+=10;
+doc.text("Name: "+d.name,10,y); y+=10;
 
-// =============================
-// ✅ MAIN POINTS (FIXED)
-// =============================
+// MAIN POINTS
 doc.text("Main Points:",10,y); y+=10;
 
 let inputs=document.querySelectorAll("#mainPoints textarea");
 
 for(let i=0;i<5;i++){
 
-  let line1 = inputs[i*2].value || "";
-  let line2 = inputs[i*2+1].value || "";
+let line1 = inputs[i*2].value || "";
+let line2 = inputs[i*2+1].value || "";
 
-  let text = (line1 + " " + line2)
-    .replace(/\r?\n|\r/g,"")
-    .replace(/\s+/g," ")
-    .trim();
+let text = (line1+" "+line2)
+.replace(/\r?\n|\r/g,"")
+.replace(/\s+/g," ")
+.trim();
 
-  if(text==="") text="[No response]";
+if(text==="") text="[No response]";
 
-let mark = (mpResults && mpResults[i]) ? "✔" : "✘";
-  doc.text(`${i+1}. ${text} (${mark})`,10,y);
-  y+=8;
+let mark = d.mpResults[i] ? "✔" : "✘";
+
+doc.text(`${i+1}. ${text} (${mark})`,10,y);
+y+=8;
 }
 
-// =============================
-// ✅ BREAKDOWN
-// =============================
+// BREAKDOWN
 y+=5;
-doc.text(`Content: ${contentScore}/5`,10,y); y+=8;
-doc.text(`Language: ${languageScore}/10`,10,y); y+=8;
-doc.text(`Organisation: ${organisationScore}/10`,10,y); y+=10;
+doc.text(`Content: ${d.contentScore}/5`,10,y); y+=8;
+doc.text(`Language: ${d.languageScore}/10`,10,y); y+=8;
+doc.text(`Organisation: ${d.organisationScore}/10`,10,y); y+=10;
 
-// =============================
-// ✅ FINAL SCORE
-// =============================
-doc.text(`Final Score: ${total}/25`,10,y); y+=8;
-doc.text(`Percent: ${percent}% Grade: ${grade}`,10,y); y+=12;
+// FINAL
+doc.text(`Final Score: ${d.total}/25`,10,y); y+=8;
+doc.text(`Percent: ${d.percent}% Grade: ${d.grade}`,10,y); y+=12;
 
-// =============================
-// ✅ FEEDBACK
-// =============================
+// FEEDBACK
 doc.text("Feedback:",10,y); y+=8;
-let feedbackLines = doc.splitTextToSize(feedbackText,180);
-doc.text(feedbackLines,10,y);
-y += feedbackLines.length * 7 + 5;
+let fb=doc.splitTextToSize(d.feedbackText,180);
+doc.text(fb,10,y);
+y+=fb.length*7+5;
 
-// =============================
-// ✅ SUMMARY
-// =============================
-if(y > 220){
-  doc.addPage();
-  y = 10;
-}
+// SUMMARY
+if(y>220){ doc.addPage(); y=10; }
+
 doc.text("Summary:",10,y); y+=8;
-let split=doc.splitTextToSize(summaryText,180);
+let split=doc.splitTextToSize(d.summaryText,180);
 doc.text(split,10,y);
 
 // =============================
-// ✅ EDITABLE FIELDS (RESTORED)
+// EDITABLE FIELDS (WORKING)
 // =============================
 
-// Teacher Score Field
+// Teacher Score
 let scoreField = new doc.AcroFormTextField();
 scoreField.Rect = [10, 270, 60, 10];
 scoreField.T = "TeacherScore";
-scoreField.V = "";
 doc.addField(scoreField);
-doc.text("Teacher Score:", 10, 265);
+doc.text("Teacher Score:",10,265);
 
-// Comments Field
+// Comments
 let commentField = new doc.AcroFormTextField();
 commentField.Rect = [80, 270, 110, 20];
 commentField.T = "Comments";
-commentField.V = "";
 doc.addField(commentField);
-doc.text("Comments:", 80, 265);
+doc.text("Comments:",80,265);
 
 // SAVE
-doc.save(name+"_Report.pdf");
+doc.save(d.name+"_Report.pdf");
+
 }
 </script>
 
