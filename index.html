@@ -268,53 +268,35 @@ button {
 
 <div class="timer" id="timer">40:00</div>
 
-<h2>Section A<br>SUMMARY WRITING</h2>
+<b>Name:</b>
+<input type="text" id="studentName" style="width:100%;padding:10px; margin-bottom:15px;">
+
+<h2>Section A - SUMMARY WRITING</h2>
 
 <p><b>(Suggested time: 35 minutes)</b></p>
 
-<p>
-You MUST answer the question in this section.<br><br>
-
-1. Read carefully the following magazine article on the use of water and write a summary of it in NOT MORE THAN 120 words. As far as possible use your own words. If the limit is exceeded, only the first 120 words of your answer will be read and assessed.<br><br>
-
-Your summary must be in continuous prose.<br><br>
-
-You may make notes or plan your summary in your answer booklet.<br><br>
-
-In your answer you will be assessed on how well you:<br>
-(a) identify main ideas<br>
-(b) organize ideas<br>
-(c) use language effectively
-</p>
-
 <h3>Water</h3>
-<div class="passage">
 
-  Imagine that you get up in the morning with the sweet sound of rain against the windows. You look out and the world sings to you. Water makes it possible. Crystal clear water is available right in the comfort of your home. Shortage is not even in the back of your mind because you know that the process of getting that water to you is in the hands of responsible persons. Some forecasts show that by 2025 more than 3 billion people will face water scarcity, but this is not because the world lacks water. The world water crisis is a crisis of management – not one of scarcity. At the global scale, there is enough water to provide “water security” for all, but only if we change the way we manage and develop it. The scarcity of water is a very relative concept that can only be seriously addressed by looking at a basket of factors, including socioeconomic, technical and institutional aspects of water use. Water is important to our national economies, our leisure and even to our culture. The sustainable management of water resources is of central importance to poverty alleviation, people’s health and the protection of the environment. The best initiatives are those that make a political commitment to consider water as an integral part of sustainable human development, and those which strive to adapt management of the resources to the needs of the poor. Our culture and lifestyles are key factors in the inequitable distribution of water. Changes in attitude and actions will bring about a positive difference, even when those attitudes and actions are as simple as realizing the value of water and remembering conservation practices. Our water use must be through sustainable practices with the aim of safeguarding this resource for our future generations. There is no quick fix or simple solution when it comes to safeguarding and managing a resource that is in as much demand as water. It is evident that to maintain our most precious resource, our managerial capacity has to be upgraded since the current strategies were developed for past human and natural needs and are now inappropriate to our present needs . Adapted from Global Environment Outlook for Youth in the Caribbean – A Vision for Change! p. 69
-
+<div>
+ <div class="passage"> Imagine that you get up in the morning with the sweet sound of rain against the windows. You look out and the world sings to you. Water makes it possible. Crystal clear water is available right in the comfort of your home. Shortage is not even in the back of your mind because you know that the process of getting that water to you is in the hands of responsible persons. Some forecasts show that by 2025 more than 3 billion people will face water scarcity, but this is not because the world lacks water. The world water crisis is a crisis of management – not one of scarcity. At the global scale, there is enough water to provide “water security” for all, but only if we change the way we manage and develop it. The scarcity of water is a very relative concept that can only be seriously addressed by looking at a basket of factors, including socioeconomic, technical and institutional aspects of water use. <br> Water is important to our national economies, our leisure and even to our culture. The sustainable management of water resources is of central importance to poverty alleviation, people’s health and the protection of the environment. The best initiatives are those that make a political commitment to consider water as an integral part of sustainable human development, and those which strive to adapt management of the resources to the needs of the poor. Our culture and lifestyles are key factors in the inequitable distribution of water. Changes in attitude and actions will bring about a positive difference, even when those attitudes and actions are as simple as realizing the value of water and remembering conservation practices. Our water use must be through sustainable practices with the aim of safeguarding this resource for our future generations. <br> There is no quick fix or simple solution when it comes to safeguarding and managing a resource that is in as much demand as water. It is evident that to maintain our most precious resource, our managerial capacity has to be upgraded since the current strategies were developed for past human and natural needs and are now inappropriate to our present needs. <br> <h2>text-align: right:</h2> Adapted from Global Environment Outlook for Youth in the Caribbean – A Vision for Change! p. 69 </div>
 </div>
 
-<!-- PLAN BOX -->
 <div class="plan-box">
-<b>You may plan your answers but what you write in this box will not be marked</b>
-<textarea rows="5"></textarea>
+<b>You may plan your answers but what you write here will not be marked</b>
+<textarea></textarea>
 </div>
 
-<!-- MAIN POINTS -->
-<h4>Type your five MAIN POINTS response on the lines below:</h4>
+<h4>Type your five MAIN POINTS</h4>
+<p><b>(5 marks)</b></p>
 
 <div id="mainPoints"></div>
 
-<p><b>5 marks</b></p>
-
-<!-- SUMMARY -->
-<h4>You should write your summary here on these lines below</h4>
+<h4>Write your summary below</h4>
+<p><b>(20 marks)</b></p>
 
 <div id="summary"></div>
 
-<p><b>20 marks</b></p>
-
-<button onclick="submitTest()">Submit Test</button>
+<button onclick="submitTest()">Submit</button>
 
 <div id="result"></div>
 
@@ -471,6 +453,7 @@ doc.save(name+"_Report.pdf");
 
 </body>
 </html>
+
   <div>
       <h1>Summary Writing Assessment Two</h1>
       <div class="question">
