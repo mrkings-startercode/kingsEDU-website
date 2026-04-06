@@ -515,38 +515,91 @@ feedbackText=decodeURIComponent(feedbackText);
 const { jsPDF } = window.jspdf;
 let doc=new jsPDF();
 
+// ✅ REQUIRED FOR EDITABLE FIELDS
+doc.initForm();
+
 let y=10;
 
-doc.text("SUMMARY REPORT",10,y);
-y+=10;
+doc.text("SUMMARY REPORT",10,y); y+=10;
+doc.text("Name: "+name,10,y); y+=10;
 
-doc.text("Name: "+name,10,y);
-y+=10;
+// =============================
+// ✅ MAIN POINTS (FIXED)
+// =============================
+doc.text("Main Points:",10,y); y+=10;
 
-// BREAKDOWN
-doc.text(`Main Points: ${contentScore}/5`,10,y); y+=8;
+let inputs=document.querySelectorAll("#mainPoints textarea");
+
+for(let i=0;i<5;i++){
+
+  let line1 = inputs[i*2].value || "";
+  let line2 = inputs[i*2+1].value || "";
+
+  let text = (line1 + " " + line2)
+    .replace(/\r?\n|\r/g,"")
+    .replace(/\s+/g," ")
+    .trim();
+
+  if(text==="") text="[No response]";
+
+  let mark = mpResults[i] ? "✔" : "✘";
+
+  doc.text(`${i+1}. ${text} (${mark})`,10,y);
+  y+=8;
+}
+
+// =============================
+// ✅ BREAKDOWN
+// =============================
+y+=5;
 doc.text(`Content: ${contentScore}/5`,10,y); y+=8;
 doc.text(`Language: ${languageScore}/10`,10,y); y+=8;
 doc.text(`Organisation: ${organisationScore}/10`,10,y); y+=10;
 
-// FINAL
+// =============================
+// ✅ FINAL SCORE
+// =============================
 doc.text(`Final Score: ${total}/25`,10,y); y+=8;
 doc.text(`Percent: ${percent}% Grade: ${grade}`,10,y); y+=12;
 
-// FEEDBACK
+// =============================
+// ✅ FEEDBACK
+// =============================
 doc.text("Feedback:",10,y); y+=8;
 let feedbackLines = doc.splitTextToSize(feedbackText,180);
 doc.text(feedbackLines,10,y);
 y += feedbackLines.length * 7 + 5;
 
-// SUMMARY
+// =============================
+// ✅ SUMMARY
+// =============================
 doc.text("Summary:",10,y); y+=8;
 let split=doc.splitTextToSize(summaryText,180);
 doc.text(split,10,y);
 
+// =============================
+// ✅ EDITABLE FIELDS (RESTORED)
+// =============================
+
+// Teacher Score Field
+let scoreField = new doc.AcroFormTextField();
+scoreField.Rect = [10, 270, 60, 10];
+scoreField.T = "TeacherScore";
+scoreField.V = "";
+doc.addField(scoreField);
+doc.text("Teacher Score:", 10, 265);
+
+// Comments Field
+let commentField = new doc.AcroFormTextField();
+commentField.Rect = [80, 270, 110, 20];
+commentField.T = "Comments";
+commentField.V = "";
+doc.addField(commentField);
+doc.text("Comments:", 80, 265);
+
+// SAVE
 doc.save(name+"_Report.pdf");
 }
-
 </script>
 
 </body>
