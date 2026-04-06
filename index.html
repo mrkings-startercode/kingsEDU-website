@@ -188,6 +188,7 @@ nav .dropdown {
 
 <!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.plugin.acroform.min.js"></script>
 
 <style>
 body {
@@ -459,11 +460,23 @@ doc.text(`Score: ${total}/25`,10,260);
 doc.text(`Percent: ${percent}% Grade: ${grade}`,10,270);
 
 // EDITABLE BOXES
-doc.rect(10,280,60,10);
-doc.text("Teacher Score",10,278);
+// CREATE REAL EDITABLE FIELDS
 
-doc.rect(80,280,100,15);
-doc.text("Comments",80,278);
+// Teacher Score Field
+let scoreField = new doc.AcroFormTextField();
+scoreField.Rect = [10, 280, 60, 10];
+scoreField.T = "TeacherScore";
+scoreField.V = "";
+doc.addField(scoreField);
+doc.text("Teacher Score:", 10, 275);
+
+// Comments Field
+let commentField = new doc.AcroFormTextField();
+commentField.Rect = [80, 280, 100, 20];
+commentField.T = "Comments";
+commentField.V = "";
+doc.addField(commentField);
+doc.text("Comments:", 80, 275);
 
 doc.save(name+"_Report.pdf");
 }
