@@ -238,11 +238,11 @@ textarea {
 
 .line {
     display:flex;
-    gap:10px;
+    gap:25px;
     margin-bottom:10px;
 }
 .line span {
-    width:20px;
+    width:40px;
 }
 
 .summary-lines textarea {
@@ -315,7 +315,7 @@ body {font-family: Arial; background:#f4f7fb; padding:20px;}
 .timer {text-align:center;font-size:22px;font-weight:bold;}
 .red {color:red;}
 textarea {width:100%;border:none;border-bottom:1px solid #000;}
-.line {display:flex;gap:10px;}
+.line {display:flex;gap:20px;}
 .plan-box {border:2px dashed #aaa;padding:10px;margin:20px 0;}
 button {width:100%;padding:12px;background:#007bff;color:white;border:none;}
 </style>
@@ -439,7 +439,7 @@ document.getElementById("result").innerHTML=`
 Name: ${name}<br>
 Score: ${total}/25 (${percent}%) - ${grade}<br>
 Time: ${document.getElementById("timer").innerText}<br>
-<button onclick="downloadPDF('${encodeURIComponent(name)}','${encodeURIComponent(summaryText)}',${JSON.stringify(mpResults)},${total},${percent},'${grade}')">
+<button onclick="downloadPDF('${encodeURIComponent(name)}', '${encodeURIComponent(mainideaText)}','${encodeURIComponent(summaryText)}',${JSON.stringify(mpResults)},${total},${percent},'${grade}')">
 Download PDF
 </button>
 `;
@@ -449,6 +449,7 @@ Download PDF
 function downloadPDF(name,summaryText,mpResults,total,percent,grade){
 
 name=decodeURIComponent(name);
+  mainideaText=decodeURIComponent(mainideaText);
 summaryText=decodeURIComponent(summaryText);
 
 const { jsPDF } = window.jspdf;
