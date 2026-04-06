@@ -187,7 +187,6 @@ nav .dropdown {
 <title>Summary Writing Test</title>
 
 <!-- jsPDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.plugin.acroform.min.js"></script>
 
 <style>
@@ -426,7 +425,10 @@ function applyWordCap(total, wordCount){
 // =============================
 function submitTest(){
 
-let inputs=document.querySelectorAll("#mainPoints textarea");
+let inputs = document.querySelectorAll("#mainPoints textarea");
+if(inputs.length === 0){
+  console.warn("Main points not found in DOM");
+}
 let summaryInputs=document.querySelectorAll("#summary textarea");
 
 // MAIN POINTS
@@ -517,6 +519,7 @@ let doc=new jsPDF();
 
 // ✅ REQUIRED FOR EDITABLE FIELDS
 doc.initForm();
+doc.setFont("Helvetica"); // stabilizes form rendering
 
 let y=10;
 
@@ -542,8 +545,7 @@ for(let i=0;i<5;i++){
 
   if(text==="") text="[No response]";
 
-  let mark = mpResults[i] ? "✔" : "✘";
-
+let mark = (mpResults && mpResults[i]) ? "✔" : "✘";
   doc.text(`${i+1}. ${text} (${mark})`,10,y);
   y+=8;
 }
@@ -573,6 +575,10 @@ y += feedbackLines.length * 7 + 5;
 // =============================
 // ✅ SUMMARY
 // =============================
+if(y > 220){
+  doc.addPage();
+  y = 10;
+}
 doc.text("Summary:",10,y); y+=8;
 let split=doc.splitTextToSize(summaryText,180);
 doc.text(split,10,y);
