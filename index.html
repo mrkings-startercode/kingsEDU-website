@@ -444,6 +444,14 @@ let finalDisplay = (analysis.wordCount <= 5)
   : `${total}/25 (${percent}%) Grade: ${grade}`;
 
 // OUTPUT (UNCHANGED STRUCTURE, JUST SAFER VALUES)
+let name=document.getElementById("studentName").value||"Student";
+
+// ADD THIS
+let safeName = name.replace(/'/g,"\\'");
+let safeSummary = summaryText.replace(/'/g,"\\'");
+let safeFeedback = feedbackText.replace(/'/g,"\\'");
+
+// OUTPUT
 document.getElementById("result").innerHTML=`
 <h3>Results</h3>
 Name: ${name}<br>
@@ -455,11 +463,11 @@ Feedback: ${feedbackText}<br>
 Final: ${finalDisplay}<br><br>
 
 <button onclick="downloadPDF(
-'${encodeURIComponent(name)}',
-'${encodeURIComponent(summaryText)}',
+'${encodeURIComponent(safeName)}',
+'${encodeURIComponent(safeSummary)}',
 ${total},
 ${percent},
-'${feedbackText}',
+'${safeFeedback}',
 '${grade}'
 )">Download PDF</button>
 `;
