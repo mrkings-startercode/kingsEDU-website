@@ -497,7 +497,7 @@ Word Count: ${analysis.wordCount}<br><br>
 
 Final Score: ${total}/25 (${percent}%) - ${grade}<br><br>
 
-<button onclick="downloadPDF('${encodeURIComponent(name)}','${encodeURIComponent(summaryText)}',${JSON.stringify(mp.results)},${total},${percent},'${grade}', ${contentScore}, ${languageScore}, ${organisationScore}, '${encodeURIComponent(feedbackText)}')">
+<button onclick="downloadPDF('${encodeURIComponent(name)}','${encodeURIComponent(summaryText)}',${JSON.stringify(mp.results)},${total},${percent},'${grade}', ${contentScore}, ${languageScore}, ${organisationScore}, encodeURIComponent(feedbackText)">
 Download PDF
 </button>
 `;
@@ -514,7 +514,8 @@ feedbackText=decodeURIComponent(feedbackText);
 
 const { jsPDF } = window.jspdf;
 let doc=new jsPDF();
-
+doc.initForm(); // ✅ REQUIRED for editable PDF fields
+  
 let y=10;
 
 doc.text("SUMMARY REPORT",10,y);
@@ -543,7 +544,25 @@ y += feedbackLines.length * 7 + 5;
 doc.text("Summary:",10,y); y+=8;
 let split=doc.splitTextToSize(summaryText,180);
 doc.text(split,10,y);
+// =============================
+// EDITABLE FIELDS (TEACHER)
+// =============================
 
+// Teacher Score
+let scoreField = new doc.AcroFormTextField();
+scoreField.Rect = [10, 270, 60, 10];
+scoreField.T = "TeacherScore";
+scoreField.V = "";
+doc.addField(scoreField);
+doc.text("Teacher Score:", 10, 265);
+
+// Comments
+let commentField = new doc.AcroFormTextField();
+commentField.Rect = [80, 270, 110, 20];
+commentField.T = "Comments";
+commentField.V = "";
+doc.addField(commentField);
+doc.text("Comments:", 80, 265);
 doc.save(name+"_Report.pdf");
 }
 
