@@ -463,17 +463,16 @@ Feedback: ${feedbackText}<br>
 Final: ${finalDisplay}<br><br>
 
 <button onclick="downloadPDF(
-'${encodeURIComponent(safeName)}',
-'${encodeURIComponent(safeSummary)}',
+'${encodeURIComponent(name)}',
+'${encodeURIComponent(summaryText)}',
 ${total},
 ${percent},
-'${safeFeedback}',
+'${feedbackText}',
 '${grade}'
 )">Download PDF</button>
 `;
 
 }
-
 
 // PDF (FULLY FIXED + EDITABLE FIELDS RESTORED)
 function downloadPDF(name,summaryText,total,percent,feedbackText,grade){
