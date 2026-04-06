@@ -180,26 +180,86 @@ nav .dropdown {
 </nav>
 <div id="quizzes" class="page hidden">
       <h1>Summary Writing Assessment One</h1>
- <!DOCTYPE html> 
+  <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Summary Writing Test</title>
 
+<!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.plugin.acroform.min.js"></script>
 
 <style>
-body {font-family: Arial;background:#f4f7fb;margin:0;padding:20px;}
-.container {max-width:900px;margin:auto;background:white;padding:25px;border-radius:10px;box-shadow:0 0 10px rgba(0,0,0,0.1);}
+body {
+    font-family: Arial, sans-serif;
+    background:#f4f7fb;
+    margin:0;
+    padding:20px;
+}
+.container {
+    max-width:900px;
+    margin:auto;
+    background:white;
+    padding:25px;
+    border-radius:10px;
+    box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
 h2 {text-align:center;}
-.timer {text-align:center;font-size:22px;font-weight:bold;margin-bottom:20px;}
+
+.timer {
+    text-align:center;
+    font-size:22px;
+    font-weight:bold;
+    margin-bottom:20px;
+}
 .red {color:red;}
-.passage {white-space:pre-line;text-align:justify;}
-textarea {width:100%;border:none;border-bottom:2px solid #000;resize:none;outline:none;font-size:20px;padding:4px;background:transparent;}
-.plan-box {border:2px dashed #aaa;padding:10px;margin:20px 0;}
-.line {display:flex;gap:10px;margin-bottom:10px;}
-button {background:#007bff;color:white;padding:12px;border:none;border-radius:6px;cursor:pointer;width:100%;margin-top:20px;}
+
+.passage {
+    white-space:pre-line;
+    text-align:justify;
+}
+
+textarea {
+    width:100%;
+    border:none;
+    border-bottom:2px solid #000;
+    resize:none;
+    outline:none;
+    font-size:20px;
+    padding:4px;
+    background:transparent;
+}
+
+.plan-box {
+    border:2px dashed #aaa;
+    padding:10px;
+    margin:20px 0;
+}
+
+.line {
+    display:flex;
+    gap:10px;
+    margin-bottom:10px;
+}
+.line span {
+    width:18px;
+}
+
+.summary-lines textarea {
+    height:25px;
+}
+
+button {
+    background:#007bff;
+    color:white;
+    padding:12px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    width:100%;
+    margin-top:20px;
+}
 </style>
 </head>
 
@@ -219,20 +279,7 @@ button {background:#007bff;color:white;padding:12px;border:none;border-radius:6p
 <h3>Water</h3>
 
 <div>
- <div class="passage">
-Imagine that you get up in the morning with the sweet sound of rain against the windows. You look out and the world sings to you. Water makes it possible. Crystal clear water is available right in the comfort of your home. Shortage is not even in the back of your mind because you know that the process of getting that water to you is in the hands of responsible persons.
-
-Some forecasts show that by 2025 more than 3 billion people will face water scarcity, but this is not because the world lacks water. The world water crisis is a crisis of management – not one of scarcity. At the global scale, there is enough water to provide “water security” for all, but only if we change the way we manage and develop it. The scarcity of water is a very relative concept that can only be seriously addressed by looking at a basket of factors, including socioeconomic, technical and institutional aspects of water use.
-
-Water is important to our national economies, our leisure and even to our culture. The sustainable management of water resources is of central importance to poverty alleviation, people’s health and the protection of the environment. The best initiatives are those that make a political commitment to consider water as an integral part of sustainable human development, and those which strive to adapt management of the resources to the needs of the poor.
-
-Our culture and lifestyles are key factors in the inequitable distribution of water. Changes in attitude and actions will bring about a positive difference, even when those attitudes and actions are as simple as realizing the value of water and remembering conservation practices. Our water use must be through sustainable practices with the aim of safeguarding this resource for our future generations.
-
-There is no quick fix or simple solution when it comes to safeguarding and managing a resource that is in as much demand as water. It is evident that to maintain our most precious resource, our managerial capacity has to be upgraded since the current strategies were developed for past human and natural needs and are now inappropriate to our present needs.
-
-<br><br>
-Adapted from Global Environment Outlook for Youth in the Caribbean – A Vision for Change! p. 69
-</div>
+ <div class="passage"> Imagine that you get up in the morning with the sweet sound of rain against the windows. You look out and the world sings to you. Water makes it possible. Crystal clear water is available right in the comfort of your home. Shortage is not even in the back of your mind because you know that the process of getting that water to you is in the hands of responsible persons. Some forecasts show that by 2025 more than 3 billion people will face water scarcity, but this is not because the world lacks water. The world water crisis is a crisis of management – not one of scarcity. At the global scale, there is enough water to provide “water security” for all, but only if we change the way we manage and develop it. The scarcity of water is a very relative concept that can only be seriously addressed by looking at a basket of factors, including socioeconomic, technical and institutional aspects of water use. <br> Water is important to our national economies, our leisure and even to our culture. The sustainable management of water resources is of central importance to poverty alleviation, people’s health and the protection of the environment. The best initiatives are those that make a political commitment to consider water as an integral part of sustainable human development, and those which strive to adapt management of the resources to the needs of the poor. Our culture and lifestyles are key factors in the inequitable distribution of water. Changes in attitude and actions will bring about a positive difference, even when those attitudes and actions are as simple as realizing the value of water and remembering conservation practices. Our water use must be through sustainable practices with the aim of safeguarding this resource for our future generations. <br> There is no quick fix or simple solution when it comes to safeguarding and managing a resource that is in as much demand as water. It is evident that to maintain our most precious resource, our managerial capacity has to be upgraded since the current strategies were developed for past human and natural needs and are now inappropriate to our present needs. <div> <br> Adapted from Global Environment Outlook for Youth in the Caribbean – A Vision for Change! p. 69  </div>
 </div>
 
 <div class="plan-box">
@@ -260,11 +307,31 @@ Adapted from Global Environment Outlook for Youth in the Caribbean – A Vision 
 
 // CREATE INPUTS
 for(let i=1;i<=5;i++){
-  mainPoints.innerHTML += `<div class="line">${i}. <textarea></textarea></div><div class="line"><textarea></textarea></div>`;
+  document.getElementById("mainPoints").innerHTML += `
+  <div class="line">${i}. <textarea></textarea></div>
+  <div class="line"><textarea></textarea></div>`;
 }
+
 for(let i=0;i<15;i++){
-  summary.innerHTML += `<textarea></textarea>`;
+  document.getElementById("summary").innerHTML += `<textarea></textarea>`;
 }
+
+// AUTO EXPAND + ENTER NEXT
+document.addEventListener("input", function(e){
+  if(e.target.tagName==="TEXTAREA"){
+    e.target.style.height="auto";
+    e.target.style.height=e.target.scrollHeight+"px";
+  }
+});
+
+document.addEventListener("keydown", function(e){
+  if(e.key==="Enter" && e.target.tagName==="TEXTAREA"){
+    e.preventDefault();
+    let t=[...document.querySelectorAll("textarea")];
+    let i=t.indexOf(e.target);
+    if(i>-1 && i<t.length-1) t[i+1].focus();
+  }
+});
 
 // TIMER
 let time=2400;
@@ -272,97 +339,157 @@ setInterval(()=>{
   time--;
   let m=Math.floor(Math.abs(time)/60);
   let s=Math.abs(time)%60;
-  if(time<=0) timer.classList.add("red");
-  timer.innerText=`${m}:${s<10?'0'+s:s}`;
+  if(time<=0) document.getElementById("timer").classList.add("red");
+  document.getElementById("timer").innerText=`${m}:${s<10?'0'+s:s}`;
 },1000);
 
-// IDEA BANK
-const ideaBank=[
+<script>
+
+// =============================
+// 1. IDEA BANK (REAL IDEAS)
+// =============================
+const ideaBank = [
 "management not scarcity",
 "enough water globally",
 "scarcity depends on factors",
-"importance economy culture health",
+"water important economy culture health",
 "sustainable management",
-"poverty environment protection",
+"reduce poverty environment",
 "attitudes affect use",
 "conservation practices",
 "future generations",
 "systems outdated"
 ];
 
-// MAIN POINTS
+// =============================
+// 2. MAIN POINTS MARKING (5)
+// =============================
 function markMainPoints(inputs){
- let score=0, results=[];
- for(let i=0;i<5;i++){
-  let text=(inputs[i*2].value+" "+inputs[i*2+1].value).toLowerCase();
-  let match=ideaBank.some(i=>text.includes(i.split(" ")[0]));
-  results.push(match);
-  if(match) score++;
- }
- return {score,results};
+  let score=0;
+  let results=[];
+
+  for(let i=0;i<5;i++){
+    let text=(inputs[i*2].value+" "+inputs[i*2+1].value).toLowerCase();
+
+    let match = ideaBank.some(idea =>
+      idea.split(" ").some(word => text.includes(word))
+    );
+
+    results.push(match);
+    if(match) score++;
+  }
+
+  return {score, results};
 }
 
-// ANALYZE
-function analyze(text){
- let clean=text.toLowerCase();
- let words=clean.trim().split(/\s+/).filter(w=>w);
- let wc=words.length;
+// =============================
+// 3. SUMMARY ANALYSIS
+// =============================
+function analyzeSummary(text){
 
- let content=0;
- ideaBank.forEach(i=>{
-  if(clean.includes(i.split(" ")[0])) content++;
- });
- content=Math.min(content,10);
+  let clean=text.toLowerCase().replace(/[^\w\s]/g,"");
+  let words = clean.trim().split(/\s+/).filter(w=>w);
+  let wordCount = words.length;
 
- let passage=document.querySelector(".passage").innerText.toLowerCase();
- let lifted=words.filter(w=>passage.includes(w)).length;
- let ratio=lifted/(wc||1);
- if(ratio>0.6) content=Math.max(0,content-4);
+  // CONTENT (10 marks)
+  let content=0;
+  ideaBank.forEach(idea=>{
+    let hit = idea.split(" ").some(word => clean.includes(word));
+    if(hit) content++;
+  });
+  content = Math.min(content,10);
 
- let sentences=text.split(/[.!?]/).filter(s=>s.trim());
- let language=5;
- if(sentences.length<2) language-=2;
- if(ratio>0.5) language-=1;
- language=Math.max(0,language);
+  // LIFTING DETECTION
+  let passage = document.querySelector(".passage").innerText.toLowerCase();
+  let liftedWords=0;
 
- let organisation=5;
- if(sentences.length<2) organisation-=2;
- if(wc<40) organisation-=1;
- organisation=Math.max(0,organisation);
+  words.forEach(w=>{
+    if(passage.includes(w)) liftedWords++;
+  });
 
- return {content,language,organisation,wc};
+  let liftRatio = liftedWords / (words.length || 1);
+
+  if(liftRatio > 0.6){
+    content = Math.max(content - 4, 0); // heavy penalty
+  }
+
+  // LANGUAGE (5 marks)
+  let sentences = text.split(/[.!?]/).filter(s=>s.trim().length>3);
+  let language = 5;
+
+  if(sentences.length < 2) language -= 2;
+  if(liftRatio > 0.5) language -= 1;
+
+  language = Math.max(0, Math.min(5, language));
+
+  // ORGANISATION (5 marks)
+  let organisation = 5;
+
+  if(sentences.length < 2) organisation -= 2;
+  if(words.length < 40) organisation -= 1;
+
+  if(!text.includes(",") && !text.includes("and")){
+    organisation -=1;
+  }
+
+  organisation = Math.max(0, organisation);
+
+  return {
+    content,
+    language,
+    organisation,
+    wordCount
+  };
 }
 
-// WORD CAP
-function cap(total,wc){
- if(wc<=5) return Math.min(total,1);
- if(wc<=10) return Math.min(total,4);
- if(wc<=25) return Math.min(total,7);
- if(wc<=59) return Math.min(total,9);
- if(wc<=80) return Math.min(total,14);
- return total;
+// =============================
+// 4. STRICT WORD CAP (CSEC RULE)
+// =============================
+function applyWordCap(total, wordCount){
+
+  if(wordCount <=5) return Math.min(total,1);
+  if(wordCount <=10) return Math.min(total,4);
+  if(wordCount <=25) return Math.min(total,7);
+  if(wordCount <=59) return Math.min(total,9);
+  if(wordCount <=80) return Math.min(total,14);
+
+  return total;
 }
 
-// SUBMIT
+// =============================
+// 5. NEW submitTest FUNCTION
+// =============================
 function submitTest(){
 
 let inputs=document.querySelectorAll("#mainPoints textarea");
-let sumInputs=document.querySelectorAll("#summary textarea");
+let summaryInputs=document.querySelectorAll("#summary textarea");
 
-let mp=markMainPoints(inputs);
+// MAIN POINTS
+let mp = markMainPoints(inputs);
 
-let text="";
-sumInputs.forEach(i=>text+=i.value+" ");
+// SUMMARY TEXT
+let summaryText="";
+summaryInputs.forEach(i=>summaryText+=i.value+" ");
 
-let a=analyze(text);
+let words=summaryText.trim().split(/\s+/);
+if(words.length>120) words=words.slice(0,120);
+summaryText=words.join(" ");
 
-let summaryMark=a.content+a.language+a.organisation;
+// ANALYZE
+let analysis = analyzeSummary(summaryText);
 
-let total=mp.score+summaryMark;
-total=cap(total,a.wc);
+// SUMMARY MARK (20)
+let summaryScore = analysis.content + analysis.language + analysis.organisation;
+
+// TOTAL (25)
+let total = mp.score + summaryScore;
+
+// APPLY WORD LIMIT CAP
+total = applyWordCap(total, analysis.wordCount);
 
 let percent=Math.round(total/25*100);
 
+// GRADE
 let grade="F";
 if(percent>=85) grade="A";
 else if(percent>=70) grade="B";
@@ -372,21 +499,34 @@ else if(percent>=21) grade="E";
 
 let name=document.getElementById("studentName").value||"Student";
 
+// OUTPUT (WITH FULL BREAKDOWN)
 document.getElementById("result").innerHTML=`
 <h3>Results</h3>
-Main Points: ${mp.score}/5<br>
-Content: ${a.content}/10<br>
-Language: ${a.language}/5<br>
-Organisation: ${a.organisation}/5<br>
-Word Count: ${a.wc}<br><br>
-Final: ${total}/25 (${percent}%) - ${grade}
-<button onclick="downloadPDF('${name}', '${text}', ${JSON.stringify(mp.results)}, ${total}, ${percent}, '${grade}')">Download PDF</button>
-`;
+Name: ${name}<br><br>
 
+Main Points: ${mp.score}/5<br>
+
+Content: ${analysis.content}/10<br>
+Language: ${analysis.language}/5<br>
+Organisation: ${analysis.organisation}/5<br>
+
+Word Count: ${analysis.wordCount}<br><br>
+
+Final Score: ${total}/25 (${percent}%) - ${grade}<br>
+
+<button onclick="downloadPDF('${encodeURIComponent(name)}','${encodeURIComponent(summaryText)}',${JSON.stringify(mp.results)},${total},${percent},'${grade}')">
+Download PDF
+</button>
+`;
 }
 
-// PDF RESTORED
+</script>
+
+// PDF
 function downloadPDF(name,summaryText,mpResults,total,percent,grade){
+
+name=decodeURIComponent(name);
+summaryText=decodeURIComponent(summaryText);
 
 const { jsPDF } = window.jspdf;
 let doc=new jsPDF();
@@ -394,12 +534,65 @@ let doc=new jsPDF();
 doc.text("SUMMARY REPORT",10,10);
 doc.text("Name: "+name,10,20);
 
-doc.text("Score: "+total+"/25",10,30);
-doc.text("Percent: "+percent+"% Grade: "+grade,10,40);
+// MAIN POINTS WITH TEXT
+doc.text("Main Points:",10,30);
+let inputs=document.querySelectorAll("#mainPoints textarea");
 
-doc.text("Summary:",10,60);
+let y=40;
+
+for(let i=0;i<5;i++){
+
+  let line1 = inputs[i*2].value || "";
+  let line2 = inputs[i*2+1].value || "";
+
+  // CLEAN TEXT HARD
+  let text = (line1 + " " + line2)
+    .replace(/\r?\n|\r/g, "")   // remove line breaks
+    .replace(/\s+/g, " ")       // normalize spaces
+    .trim();
+
+  // FORCE SAFE TEXT (prevents jsPDF weird rendering)
+  if(text.length === 0){
+      text = "[No response]";
+  }
+
+  // REMOVE EMOJI (they cause rendering bugs)
+  let mark = mpResults[i] ? "Correct-✔" : "Incorrect- X";
+
+  // FINAL STRING (clean ASCII only)
+  let output = `${i+1}. ${text} (${mark})`;
+
+  doc.text(output, 10, y);
+
+  y += 10;
+}
+// SUMMARY
+doc.text("Summary:",10,y+10);
 let split=doc.splitTextToSize(summaryText,180);
-doc.text(split,10,70);
+doc.text(split,10,y+20);
+
+// SCORE
+doc.text(`Score: ${total}/25`,10,260);
+doc.text(`Percent: ${percent}% Grade: ${grade}`,10,270);
+
+// EDITABLE BOXES
+// CREATE REAL EDITABLE FIELDS
+
+// Teacher Score Field
+let scoreField = new doc.AcroFormTextField();
+scoreField.Rect = [10, 280, 60, 10];
+scoreField.T = "TeacherScore";
+scoreField.V = "";
+doc.addField(scoreField);
+doc.text("Teacher Score:", 10, 275);
+
+// Comments Field
+let commentField = new doc.AcroFormTextField();
+commentField.Rect = [80, 280, 100, 20];
+commentField.T = "Comments";
+commentField.V = "";
+doc.addField(commentField);
+doc.text("Comments:", 40, 275);
 
 doc.save(name+"_Report.pdf");
 }
@@ -430,7 +623,7 @@ doc.save(name+"_Report.pdf");
         <button onclick="submitAnswer()">Submit Answer</button>
         <button onclick="clearSelection()">Clear Selection</button>
         <div id="result" class="result"></div>
-     
+      
           <div id="studentScore"></div>
           <div style="margin-top:10px;">
             <input type="password" id="resultsPassword" placeholder="Enter results password">
@@ -549,7 +742,7 @@ doc.save(name+"_Report.pdf");
 </html>
 
     <div id="home" class="page">
-     
+      
       <h2>Welcome to the Home Page of King's Royal Lessons</h2>
     </div>
 
@@ -562,15 +755,15 @@ doc.save(name+"_Report.pdf");
       <div class="paragraph">
         <p>Read the following praragraph below, note where the highligted text is in this passage. <br><br>The main idea of the passage is highlighted below in the text. Finding the main idea, is very important in Summary Writing as a technique. If you notice where the main idea is in this passage below. This shows that though the main idea is often found at the start or the ending of texts; that is not always the case and it is still important to survey the text to ensure that the main idea you have selected captures the essence of what the entire passage is about.</p><br>
   <strong>Example: The Impact of Artificial Intelligence on Jobs</strong><br /><br />
-  Artificial Intelligence (AI) is transforming workplaces and automating many tasks that people used to do.
-  <span While this creates efficiency,  class="highlight-box" style="background-color: skyblue;">AI is significantly changing job roles and even eliminating some traditional positions.</span>
+  Artificial Intelligence (AI) is transforming workplaces and automating many tasks that people used to do. 
+  <span While this creates efficiency,  class="highlight-box" style="background-color: skyblue;">AI is significantly changing job roles and even eliminating some traditional positions.</span> 
   As a result, workers need to adapt by learning new skills. Companies are also reshaping their hiring practices and training programs to match these changes.
 </div>
 
       <p>Instructions: Click the plus (+) signs below to learn more about finding the main idea.</p>
       <p>The main idea tells us what a passage is mostly about. <button onclick="showTip(1)">+</button> <span id="tip1"></span>. It’s the most important point the author wants to share. <button onclick="showTip(2)">+</button> <span id="tip2"></span> The other sentences support or give more information about this idea.  <button onclick="showTip(3)">+</button> <span id="tip3"></span></p>
 <div>
- 
+  
 
 </div>
       <div id="lesson1Progress"></div>
@@ -580,8 +773,8 @@ doc.save(name+"_Report.pdf");
       <br> <p> Now let's look at this paragraph on "How to build a table" below. <p> <br></p>
       <div class="paragraph">
   <strong>Example: How to Build a Table</strong><br /><br />
-  Building a table requires careful planning and the right materials.
-  <span class="highlight-box" style="background-color: rgb(255, 164, 255);">The key steps include measuring the wood, cutting it to size, assembling the frame, and securing the legs.</span>
+  Building a table requires careful planning and the right materials. 
+  <span class="highlight-box" style="background-color: rgb(255, 164, 255);">The key steps include measuring the wood, cutting it to size, assembling the frame, and securing the legs.</span> 
   After that, sanding and finishing give the table a smooth and polished look. Whether for beginners or experts, following these steps ensures a sturdy and functional piece of furniture.
 </div>
       <p>Finding the main idea becomes easier when you use this formula: <br />  Main Idea = Subject + What the writer says about the subject. <br /> <br /> Using the information you have been learning about Summary writing thus far, which of the following is MOST LIKELY TRUE about finding the main idea?</p>
@@ -772,8 +965,8 @@ doc.save(name+"_Report.pdf");
       <br><p> Now look at this final example paragraph below entitled "Homework"<P><br>
     <div class="paragraph">
   <strong>Example: The Importance of Doing Homework</strong><br /><br />
-  Homework plays a vital role in reinforcing what students learn in class.
-  <span class="highlight-box" style="background-color: rgb(226, 145, 145);">It helps students practice independently and strengthens their understanding of the material.</span>
+  Homework plays a vital role in reinforcing what students learn in class. 
+  <span class="highlight-box" style="background-color: rgb(226, 145, 145);">It helps students practice independently and strengthens their understanding of the material.</span> 
   Additionally, homework teaches responsibility, time management, and critical thinking—skills that are essential for academic and personal success.
 </div>
       <p>Instructions: Use the slider below to explore five key tips about finding the main idea.</p>
@@ -1423,7 +1616,7 @@ doc.save(name+"_Report.pdf");
     // Wall bounce
     if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) dx = -dx;
     if (y + dy < ballRadius) dy = -dy;
-   
+    
 
     // Paddle bounce or miss
     if (y + dy > canvas.height - paddleHeight - 5) {
@@ -1663,3 +1856,7 @@ function updateTokens() {
       padding: 20px;
     }
   </style>
+
+
+
+    
