@@ -503,10 +503,6 @@ Download PDF
 `;
 }
 
-// =============================
-// 6. PDF FUNCTION (FIXED)
-// =============================
-<!-- KEEP ALL YOUR ORIGINAL CODE ABOVE EXACTLY THE SAME -->
 
 <script>
 
@@ -622,10 +618,9 @@ y+=45;
 // =============================
 // SAVE
 // =============================
-
-doc.save(name+"_Report.pdf");
+doc.save(name+"_Editable_Report.pdf");
 }
-<script>
+  <script>
 // 🔥 ENSURE ACROFORM INITIALIZATION
 window.jspdf.jsPDF.API.events.push(['initialized', function () {
     this.initForm();
