@@ -528,7 +528,7 @@ doc.text("Name: "+name,10,y);
 y+=10;
 
 // =============================
-// STUDENT MAIN POINTS (REAL INPUT)
+// MAIN POINTS
 // =============================
 doc.text("Student Main Points:",10,y);
 y+=8;
@@ -536,7 +536,7 @@ y+=8;
 let mpInputs = document.querySelectorAll("#mainPoints textarea");
 
 for(let i=0;i<5;i++){
-    let mpText = (mpInputs[i*2].value + " " + mpInputs[i*2+1].value).trim();
+    let mpText = (mpInputs[i*2].value + " " + mpInputs[i*2+1].value).trim() || "[No response]";
     let split = doc.splitTextToSize((i+1)+". "+mpText,180);
     doc.text(split,10,y);
     y += split.length * 6;
@@ -555,7 +555,7 @@ doc.text(split,10,y);
 y += split.length * 6 + 5;
 
 // =============================
-// AUTO SCORES
+// SCORES
 // =============================
 doc.text("Auto Scores:",10,y);
 y+=8;
@@ -576,19 +576,8 @@ let feedbackLines = doc.splitTextToSize(feedbackText,180);
 doc.text(feedbackLines,10,y);
 y += feedbackLines.length * 6 + 10;
 
-
-// FINAL SCORE
-doc.text("Final Score:",10,y);
-y+=15;
-
 // =============================
-// ✅ ENABLE FORM (CRITICAL)
-// =============================
-doc.initForm();
-doc.setFont("Helvetica");
-
-// =============================
-// MOVE DOWN SAFELY
+// 🔥 ENSURE SPACE
 // =============================
 if(y > 230){
   doc.addPage();
@@ -596,29 +585,29 @@ if(y > 230){
 }
 
 // =============================
-// ✅ TEACHER SCORE FIELD (REAL INPUT)
+// 🔥 CREATE FORM FIELDS PROPERLY
 // =============================
+
+// Teacher Score Label
 doc.text("Teacher Score:",10,y);
 
+// FIELD 1
 let scoreField = new doc.AcroFormTextField();
-scoreField.Rect = [70, y-5, 40, 10];
 scoreField.T = "TeacherScore";
+scoreField.Rect = [70, y-5, 40, 10];
 scoreField.V = "";
 doc.addField(scoreField);
 
-y += 15;
+y += 20;
 
-// =============================
-// ✅ COMMENTS FIELD (MULTILINE)
-// =============================
+// Teacher Comments Label
 doc.text("Teacher Comments:",10,y);
 
+// FIELD 2 (MULTILINE)
 let commentField = new doc.AcroFormTextField();
+commentField.T = "TeacherComments";
 commentField.Rect = [10, y+5, 180, 40];
-commentField.T = "Comments";
 commentField.V = "";
-
-// 🔴 THIS MAKES IT MULTILINE
 commentField.multiline = true;
 
 doc.addField(commentField);
