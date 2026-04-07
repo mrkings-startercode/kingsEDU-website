@@ -566,19 +566,6 @@ let split=doc.splitTextToSize(summaryText,180);
 doc.text(split,10,y);
 y += 10;
 
-// Teacher Grade
-doc.text("Teacher's Grade:",10,y);
-
-doc.addTextField({
-  x: 60,
-  y: y - 5,
-  w: 40,
-  h: 10,
-  text: grade
-});
-
-y += 15;
-
 // Teacher Comment
 doc.text("Teacher's Comment:",10,y);
 
