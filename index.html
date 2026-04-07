@@ -189,7 +189,25 @@ nav .dropdown {
 <!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.plugin.acroform.min.js"></script>
+<script>
+// 🔥 ENSURE ACROFORM INITIALIZATION
+window.jspdf.jsPDF.API.events.push(['initialized', function () {
+    this.initForm();
+}]);
 
+// 🔥 HELPER FOR TEXT FIELD (CLEAN)
+jsPDF.API.addTextField = function(name, x, y, w, h) {
+    return this.addField({
+        name: name,
+        type: 'text',
+        x: x,
+        y: y,
+        width: w,
+        height: h,
+        borderStyle: 'solid'
+    });
+};
+</script>
 <style>
 body {
     font-family: Arial, sans-serif;
@@ -503,6 +521,10 @@ Download PDF
 `;
 }
 
+// =============================
+// 6. PDF FUNCTION (FIXED)
+// =============================
+<!-- KEEP ALL YOUR ORIGINAL CODE ABOVE EXACTLY THE SAME -->
 
 <script>
 
@@ -620,24 +642,7 @@ y+=45;
 // =============================
 doc.save(name+"_Editable_Report.pdf");
 }
-  <script>
-// 🔥 ENSURE ACROFORM INITIALIZATION
-window.jspdf.jsPDF.API.events.push(['initialized', function () {
-    this.initForm();
-}]);
 
-// 🔥 HELPER FOR TEXT FIELD (CLEAN)
-jsPDF.API.addTextField = function(name, x, y, w, h) {
-    return this.addField({
-        name: name,
-        type: 'text',
-        x: x,
-        y: y,
-        width: w,
-        height: h,
-        borderStyle: 'solid'
-    });
-};
 </script>
 
 </body>
