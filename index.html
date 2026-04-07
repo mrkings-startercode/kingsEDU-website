@@ -500,7 +500,7 @@ Final Score: ${total}/25 (${percent}%) - ${grade}<br><br>
 <button onclick='downloadPDF(
 "${encodeURIComponent(name)}",
 "${encodeURIComponent(summaryText)}",
-${JSON.stringify(mp.results)},
+${JSON.stringify([...inputs].map(i => i.value))},
 ${total},
 ${percent},
 "${grade}",
@@ -517,8 +517,8 @@ Download PDF
 // =============================
 // 6. PDF FUNCTION (FIXED)
 // =============================
-function downloadPDF(name,summaryText,mpResults,total,percent,grade,contentScore,languageScore,organisationScore,feedbackText){
-
+function downloadPDF(name,summaryText,mainPoints,total,percent,grade,contentScore,languageScore,organisationScore,feedbackText)
+  
 name=decodeURIComponent(name);
 summaryText=decodeURIComponent(summaryText);
 feedbackText=decodeURIComponent(feedbackText);
@@ -549,12 +549,46 @@ doc.text("Feedback:",10,y); y+=8;
 let feedbackLines = doc.splitTextToSize(feedbackText,180);
 doc.text(feedbackLines,10,y);
 y += feedbackLines.length * 7 + 5;
+// MAIN IDEAS
+doc.text("Main Ideas:",10,y);
+y+=8;
 
+mainPoints.forEach((point, index) => {
+  let lines = doc.splitTextToSize((index+1)+". "+point,180);
+  doc.text(lines,10,y);
+  y += lines.length * 7;
+});
+
+y += 5;
 // SUMMARY
 doc.text("Summary:",10,y); y+=8;
 let split=doc.splitTextToSize(summaryText,180);
 doc.text(split,10,y);
+y += 10;
 
+// Teacher Grade
+doc.text("Teacher's Grade:",10,y);
+
+doc.addTextField({
+  x: 60,
+  y: y - 5,
+  w: 40,
+  h: 10,
+  text: grade
+});
+
+y += 15;
+
+// Teacher Comment
+doc.text("Teacher's Comment:",10,y);
+
+doc.addTextField({
+  x: 10,
+  y: y + 2,
+  w: 180,
+  h: 30,
+  multiline: true
+});
 doc.save(name+"_Report.pdf");
 }
 
