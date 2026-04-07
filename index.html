@@ -514,12 +514,10 @@ summaryText=decodeURIComponent(summaryText);
 feedbackText=decodeURIComponent(feedbackText);
 
 const { jsPDF } = window.jspdf;
-doc.initForm(); // ← MUST BE HERE
-let doc = new jsPDF();
+let doc=new jsPDF();
 
+let y=10;
 
-
-let y = 10;
 // TITLE
 doc.setFontSize(16);
 doc.text("SUMMARY REPORT",10,y);
