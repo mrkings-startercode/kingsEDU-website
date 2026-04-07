@@ -583,11 +583,13 @@ doc.rect(70, y-5, 40, 8); // ← ADD THIS
 y+=15;
 
 
+// COMMENTS BOX
+doc.text("Teacher Comments:",10,y);
+y+=6;
 
 doc.addField(new window.jspdf.AcroFormTextField({
     value: "",
     rect: [10, y, 180, 40],
-    fieldName: "teacher_comments",
     multiline: true
 }));
 
