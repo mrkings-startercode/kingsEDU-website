@@ -578,41 +578,26 @@ y += feedbackLines.length * 6 + 10;
 
 doc.text("Teacher Review (Editable):",10,y);
 y+=10;
-
-// MAIN POINTS
-doc.text("Main Points Score:",10,y);
-doc.addField(new window.jspdf.AcroFormTextField({
-    value: "",
-    rect: [70, y-5, 40, 8],
-    fieldName: "teacher_mp"
-}));
-y+=10;
-
-// LANGUAGE
-doc.text("Language Score:",10,y);
-doc.addField(new window.jspdf.AcroFormTextField({
-    value: "",
-    rect: [70, y-5, 40, 8],
-    fieldName: "teacher_lang"
-}));
-y+=10;
-
-// ORGANISATION
-doc.text("Organisation Score:",10,y);
-doc.addField(new window.jspdf.AcroFormTextField({
-    value: "",
-    rect: [70, y-5, 40, 8],
-    fieldName: "teacher_org"
-}));
-y+=10;
-
-// FINAL
+// FINAL SCORE
 doc.text("Final Score:",10,y);
-doc.addField(new window.jspdf.AcroFormTextField({
-    value: "",
-    rect: [70, y-5, 40, 8],
-    fieldName: "teacher_final"
-}));
+doc.rect(70, y-5, 40, 8); // ← ADD THIS
+y+=15;
+
+// COMMENTS
+doc.text("Teacher Comments:",10,y);
+y+=5;
+
+doc.rect(10, y, 180, 40); // ← ADD THIS
+// FINAL SCORE
+doc.text("Final Score:",10,y);
+doc.rect(70, y-5, 40, 8); // ← ADD THIS
+y+=15;
+
+// COMMENTS
+doc.text("Teacher Comments:",10,y);
+y+=5;
+
+doc.rect(10, y, 180, 40); // ← ADD THIS
 y+=12;
 
 // COMMENTS BOX
