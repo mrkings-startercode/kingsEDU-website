@@ -189,14 +189,14 @@ nav .dropdown {
 <!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.plugin.acroform.min.js"></script>
-<script>
-// 🔥 ENSURE ACROFORM INITIALIZATION
+  <script>
+// ✅ FORCE FORM SUPPORT TO ACTIVATE
 window.jspdf.jsPDF.API.events.push(['initialized', function () {
     this.initForm();
 }]);
 
-// 🔥 HELPER FOR TEXT FIELD (CLEAN)
-jsPDF.API.addTextField = function(name, x, y, w, h) {
+// ✅ SIMPLE HELPER FOR TEXT BOXES
+window.jspdf.jsPDF.API.addTextField = function(name, x, y, w, h) {
     return this.addField({
         name: name,
         type: 'text',
@@ -208,6 +208,7 @@ jsPDF.API.addTextField = function(name, x, y, w, h) {
     });
 };
 </script>
+
 <style>
 body {
     font-family: Arial, sans-serif;
@@ -524,13 +525,6 @@ Download PDF
 // =============================
 // 6. PDF FUNCTION (FIXED)
 // =============================
-<!-- KEEP ALL YOUR ORIGINAL CODE ABOVE EXACTLY THE SAME -->
-
-<script>
-
-// =============================
-// 6. PDF FUNCTION (UPGRADED WITH EDITABLE BOXES)
-// =============================
 function downloadPDF(name,summaryText,mpResults,total,percent,grade,contentScore,languageScore,organisationScore,feedbackText){
 
 name=decodeURIComponent(name);
@@ -542,105 +536,34 @@ let doc=new jsPDF();
 
 let y=10;
 
-// =============================
-// TITLE
-// =============================
-doc.setFontSize(16);
 doc.text("SUMMARY REPORT",10,y);
 y+=10;
 
-doc.setFontSize(12);
 doc.text("Name: "+name,10,y);
 y+=10;
 
-// =============================
-// STUDENT MAIN POINTS (ADDED)
-// =============================
-doc.text("Student Main Points:",10,y);
-y+=8;
+// BREAKDOWN
+doc.text(`Main Points: ${contentScore}/5`,10,y); y+=8;
+doc.text(`Content: ${contentScore}/5`,10,y); y+=8;
+doc.text(`Language: ${languageScore}/10`,10,y); y+=8;
+doc.text(`Organisation: ${organisationScore}/10`,10,y); y+=10;
 
-let mpInputs = document.querySelectorAll("#mainPoints textarea");
+// FINAL
+doc.text(`Final Score: ${total}/25`,10,y); y+=8;
+doc.text(`Percent: ${percent}% Grade: ${grade}`,10,y); y+=12;
 
-for(let i=0;i<5;i++){
-    let mpText = (mpInputs[i*2].value + " " + mpInputs[i*2+1].value).trim();
-    let split = doc.splitTextToSize((i+1)+". "+mpText,180);
-    doc.text(split,10,y);
-    y += split.length * 6;
-}
-
-y+=5;
-
-// =============================
-// SUMMARY
-// =============================
-doc.text("Student Summary:",10,y);
-y+=8;
-
-let split=doc.splitTextToSize(summaryText,180);
-doc.text(split,10,y);
-y += split.length * 6 + 5;
-
-// =============================
-// AUTO SCORES (READ ONLY DISPLAY)
-// =============================
-doc.text("Auto Scores:",10,y);
-y+=8;
-
-doc.text(`Content: ${contentScore}/5`,10,y); y+=6;
-doc.text(`Language: ${languageScore}/10`,10,y); y+=6;
-doc.text(`Organisation: ${organisationScore}/10`,10,y); y+=6;
-doc.text(`Total: ${total}/25 (${percent}%) Grade: ${grade}`,10,y);
-y+=10;
-
-// =============================
 // FEEDBACK
-// =============================
-doc.text("Auto Feedback:",10,y);
-y+=6;
-
+doc.text("Feedback:",10,y); y+=8;
 let feedbackLines = doc.splitTextToSize(feedbackText,180);
 doc.text(feedbackLines,10,y);
-y += feedbackLines.length * 6 + 10;
+y += feedbackLines.length * 7 + 5;
 
-// =============================
-// 🔥 TEACHER EDITABLE SECTION (ACROFORM)
-// =============================
-doc.text("Teacher Review (Editable):",10,y);
-y+=10;
+// SUMMARY
+doc.text("Summary:",10,y); y+=8;
+let split=doc.splitTextToSize(summaryText,180);
+doc.text(split,10,y);
 
-// MAIN POINT SCORE BOX
-doc.text("Main Points Score:",10,y);
-doc.addTextField("teacher_mp", 70, y-5, 30, 8);
-y+=10;
-
-// LANGUAGE BOX
-doc.text("Language Score:",10,y);
-doc.addTextField("teacher_lang", 70, y-5, 30, 8);
-y+=10;
-
-// ORGANISATION BOX
-doc.text("Organisation Score:",10,y);
-doc.addTextField("teacher_org", 70, y-5, 30, 8);
-y+=10;
-
-// FINAL SCORE BOX
-doc.text("Final Score:",10,y);
-doc.addTextField("teacher_final", 70, y-5, 30, 8);
-y+=10;
-
-// =============================
-// TEACHER COMMENT BOX (LARGE)
-// =============================
-doc.text("Teacher Comments:",10,y);
-y+=6;
-
-doc.addTextField("teacher_comments", 10, y, 180, 40);
-y+=45;
-
-// =============================
-// SAVE
-// =============================
-doc.save(name+"_Editable_Report.pdf");
+doc.save(name+"_Report.pdf");
 }
 
 </script>
