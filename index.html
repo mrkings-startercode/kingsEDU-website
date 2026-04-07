@@ -576,8 +576,7 @@ let feedbackLines = doc.splitTextToSize(feedbackText,180);
 doc.text(feedbackLines,10,y);
 y += feedbackLines.length * 6 + 10;
 
-doc.text("Teacher Review (Editable):",10,y);
-y+=10;
+
 // FINAL SCORE
 doc.text("Final Score:",10,y);
 doc.rect(70, y-5, 40, 8); // ← ADD THIS
@@ -588,17 +587,7 @@ doc.text("Teacher Comments:",10,y);
 y+=5;
 
 doc.rect(10, y, 180, 40); // ← ADD THIS
-// FINAL SCORE
-doc.text("Final Score:",10,y);
-doc.rect(70, y-5, 40, 8); // ← ADD THIS
-y+=15;
 
-// COMMENTS
-doc.text("Teacher Comments:",10,y);
-y+=5;
-
-doc.rect(10, y, 180, 40); // ← ADD THIS
-y+=12;
 
 // COMMENTS BOX
 doc.text("Teacher Comments:",10,y);
