@@ -577,35 +577,26 @@ doc.text(feedbackLines,10,y);
 y += feedbackLines.length * 6 + 10;
 
 
-// =============================
-// 🔥 TEACHER EDITABLE SECTION (REAL FIELDS)
-// =============================
-
 // FINAL SCORE
 doc.text("Final Score:",10,y);
-
-let finalScoreField = new window.jspdf.AcroFormTextField();
-finalScoreField.Rect = [70, y-5, 40, 8];
-finalScoreField.fieldName = "teacher_final";
-finalScoreField.value = "";
-doc.addField(finalScoreField);
-
+doc.rect(70, y-5, 40, 8); // ← ADD THIS
 y+=15;
+
 
 // COMMENTS BOX
 doc.text("Teacher Comments:",10,y);
 y+=6;
 
-let commentsField = new window.jspdf.AcroFormTextField();
-commentsField.Rect = [10, y, 180, 40];
-commentsField.fieldName = "teacher_comments";
-commentsField.value = "";
-commentsField.multiline = true;
-
-doc.addField(commentsField);
+doc.addField(new window.jspdf.AcroFormTextField({
+    value: "",
+    rect: [10, y, 180, 40],
+    fieldName: "teacher_comments",
+    multiline: true
+}));
 
 // SAVE
 doc.save(name+"_Editable_Report.pdf");
+}
 </script>
 
 </body>
