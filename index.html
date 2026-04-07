@@ -579,20 +579,49 @@ y += feedbackLines.length * 6 + 10;
 
 // FINAL SCORE
 doc.text("Final Score:",10,y);
-doc.rect(70, y-5, 40, 8); // ← ADD THIS
 y+=15;
 
+// =============================
+// ✅ ENABLE FORM (CRITICAL)
+// =============================
+doc.initForm();
+doc.setFont("Helvetica");
 
-// COMMENTS BOX
+// =============================
+// MOVE DOWN SAFELY
+// =============================
+if(y > 230){
+  doc.addPage();
+  y = 20;
+}
+
+// =============================
+// ✅ TEACHER SCORE FIELD (REAL INPUT)
+// =============================
+doc.text("Teacher Score:",10,y);
+
+let scoreField = new doc.AcroFormTextField();
+scoreField.Rect = [70, y-5, 40, 10];
+scoreField.T = "TeacherScore";
+scoreField.V = "";
+doc.addField(scoreField);
+
+y += 15;
+
+// =============================
+// ✅ COMMENTS FIELD (MULTILINE)
+// =============================
 doc.text("Teacher Comments:",10,y);
-y+=6;
 
-doc.addField(new window.jspdf.AcroFormTextField({
-    value: "",
-    rect: [10, y, 180, 40],
-    fieldName: "teacher_comments",
-    multiline: true
-}));
+let commentField = new doc.AcroFormTextField();
+commentField.Rect = [10, y+5, 180, 40];
+commentField.T = "Comments";
+commentField.V = "";
+
+// 🔴 THIS MAKES IT MULTILINE
+commentField.multiline = true;
+
+doc.addField(commentField);
 
 // SAVE
 doc.save(name+"_Editable_Report.pdf");
